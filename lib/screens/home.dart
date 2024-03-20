@@ -190,9 +190,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void initializeThermal(TtsModel model, LayoutModel layoutModel) async {
-    _thermal.onBatteryTemperatureChanged.listen((double temperature) {
+    _thermal.onBatteryTemperatureChanged.listen((double temperature) async {
       if (temperature > 45) {
         layoutModel.isShowPreview = false;
+
+        updateChannelSubscription("");
+        await TextToSpeechPlugin.speak("Text to speech disabled");
+        await TextToSpeechPlugin.disableTTS();
+        NotificationsPlugin.cancelNotification();
       }
     });
 
