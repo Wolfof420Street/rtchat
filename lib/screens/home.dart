@@ -174,16 +174,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     Wakelock.enable();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      debugPrint("Post frame callback executed");
+    
       if (!mounted) return;
-      debugPrint("Post frame callback post executed");
+      
       final model = Provider.of<AudioModel>(context, listen: false);
       final ttsModel = Provider.of<TtsModel>(context, listen: false);
+
       // if (model.sources.isEmpty || (await AudioChannel.hasPermission())) {
-        return;
-      } //
+      //   return;
+      //   }
+      
       if (mounted) {
-        debugPrint("Conditions passed");
+       
         model.showAudioPermissionDialog(context);
         debugPrint("Directly calling listenToTTs");
         NotificationsPlugin.listenToTTs(ttsModel);
@@ -192,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _batteryStateSubscription =
             _battery.onBatteryStateChanged.listen(_updateBatteryState);
 
-        checkAndHandleBatteryLevel(ttsModel);
+        
       }
     });
   }
@@ -201,16 +203,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (_batteryState == state) return;
     setState(() {
       _batteryState = state;
+      checkAndHandleBatteryLevel();
     });
   }
 
-  Future<void> checkAndHandleBatteryLevel(TtsModel model) async {
+  Future<void> checkAndHandleBatteryLevel() async {
     final int batteryLevel = await _battery.batteryLevel;
     final bool isCharging = _batteryState == BatteryState.charging;
 
+    if(!mounted) {
+      return;
+    }
+
+    final ttsModel = Provider.of<TtsModel>(context, listen: false);
+
+    debugPrint("Battery level : $batteryLevel" );
+
     if (batteryLevel < 5 && !isCharging) {
-      if(model.enabled) {
-      model.enabled = false;
+
+      if(ttsModel.enabled) {
+      ttsModel.enabled = false;
       updateChannelSubscription("");
       await TextToSpeechPlugin.speak("Text to speech disabled");
       await TextToSpeechPlugin.disableTTS();
