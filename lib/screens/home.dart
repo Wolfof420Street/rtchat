@@ -174,27 +174,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     Wakelock.enable();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-    
       if (!mounted) return;
-      
+
       final model = Provider.of<AudioModel>(context, listen: false);
       final ttsModel = Provider.of<TtsModel>(context, listen: false);
 
-      // if (model.sources.isEmpty || (await AudioChannel.hasPermission())) {
-      //   return;
-      //   }
-      
+      NotificationsPlugin.listenToTTs(ttsModel);
+
+      _battery.batteryState.then(_updateBatteryState);
+      _batteryStateSubscription =
+          _battery.onBatteryStateChanged.listen(_updateBatteryState);
+
+      if (model.sources.isEmpty || (await AudioChannel.hasPermission())) {
+        return;
+      }
+
       if (mounted) {
-       
         model.showAudioPermissionDialog(context);
-        debugPrint("Directly calling listenToTTs");
-        NotificationsPlugin.listenToTTs(ttsModel);
-
-        _battery.batteryState.then(_updateBatteryState);
-        _batteryStateSubscription =
-            _battery.onBatteryStateChanged.listen(_updateBatteryState);
-
-        
       }
     });
   }
@@ -211,22 +207,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final int batteryLevel = await _battery.batteryLevel;
     final bool isCharging = _batteryState == BatteryState.charging;
 
-    if(!mounted) {
+    if (!mounted) {
       return;
     }
 
     final ttsModel = Provider.of<TtsModel>(context, listen: false);
 
-    debugPrint("Battery level : $batteryLevel" );
+    debugPrint("Battery level : $batteryLevel");
 
     if (batteryLevel < 5 && !isCharging) {
-
-      if(ttsModel.enabled) {
-      ttsModel.enabled = false;
-      updateChannelSubscription("");
-      await TextToSpeechPlugin.speak("Text to speech disabled");
-      await TextToSpeechPlugin.disableTTS();
-      NotificationsPlugin.cancelNotification();
+      if (ttsModel.enabled) {
+        ttsModel.enabled = false;
+        updateChannelSubscription("");
+        await TextToSpeechPlugin.speak("Text to speech disabled");
+        await TextToSpeechPlugin.disableTTS();
+        NotificationsPlugin.cancelNotification();
       }
     }
   }
