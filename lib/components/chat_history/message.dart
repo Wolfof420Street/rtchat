@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rtchat/components/chat_history/auxiliary/realtimecash_donation.dart';
 import 'package:rtchat/components/chat_history/auxiliary/streamelements.dart';
@@ -79,6 +80,42 @@ class ChatHistoryMessage extends StatelessWidget {
           return child;
         }
 
+
+  String getLabel(int value) {
+    switch (value) {
+      case 1:
+        return AppLocalizations.of(context)!.durationOneSecond;
+      case 2:
+        return AppLocalizations.of(context)!.durationOneMinute;
+      case 3:
+        return AppLocalizations.of(context)!.durationTenMinutes;
+      case 4:
+        return AppLocalizations.of(context)!.durationOneHour;
+      case 5:
+        return AppLocalizations.of(context)!.durationSixHours;
+      case 6:
+        return AppLocalizations.of(context)!.durationOneDay;
+      case 7:
+        return AppLocalizations.of(context)!.durationTwoDays;
+      case 8:
+        return AppLocalizations.of(context)!.durationOneWeek;
+      case 9:
+        return AppLocalizations.of(context)!.durationTwoWeeks;
+    }
+    return "";
+  }
+
+
+
+  String formatDuration(DateTime timestamp) {
+    
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+     return getLabel(difference.inSeconds);
+
+  }
+
         return Material(
           child: InkWell(
               onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -93,6 +130,12 @@ class ChatHistoryMessage extends StatelessWidget {
                             primary: false,
                             children: [
                               if (kDebugMode) Text("DEBUG: id=${m.messageId}"),
+                              ListTile(
+                                leading:
+                                    const Icon(Icons.timer, color: Colors.grey),
+                                title: Text(
+                                    '${AppLocalizations.of(context)!.sentMesssageExpose} ${formatDuration(message.timestamp)} ${AppLocalizations.of(context)!.agoMesssageText}'),
+                              ),
                               Consumer<TtsModel>(
                                   builder: (context, ttsModel, child) {
                                 if (ttsModel.isMuted(m.author)) {
