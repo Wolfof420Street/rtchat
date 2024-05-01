@@ -49,12 +49,12 @@ dependencies:
   sticky_headers: ^0.3.0+2
   styled_text: ^8.1.0
   stream_transform: ^2.1.0
+  thermal: ^1.1.5
   url_launcher: ^6.2.4
   wakelock: ^0.6.2
   webview_flutter: ^4.5.0
   webview_flutter_android: ^3.14.0
   webview_flutter_wkwebview: ^3.11.0
-  uuid: ^4.4.0
 
 dev_dependencies:
   flutter_lints: ^3.0.1

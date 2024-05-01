@@ -23,14 +23,14 @@ class OnboardingScreen extends StatelessWidget {
           body: SafeArea(
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(32),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Image(
                         width: 160, image: AssetImage('assets/logo.png')),
                     Padding(
-                        padding: const EdgeInsets.only(bottom: 32),
+                        padding: const EdgeInsets.only(bottom: 64),
                         child: Text("RealtimeChat",
                             style: Theme.of(context)
                                 .textTheme
@@ -67,7 +67,7 @@ class _LoginOptionsWidgetState extends State<LoginOptionsWidget> {
       SizedBox(
         width: 400,
         child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 64),
             child: SignInWithTwitch(
               onStart: () {
                 setState(() {
@@ -92,7 +92,7 @@ class _LoginOptionsWidgetState extends State<LoginOptionsWidget> {
       SizedBox(
         width: 400,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 64),
           child: ElevatedButton(
             child: Text(
               AppLocalizations.of(context)!.continueAsGuest,

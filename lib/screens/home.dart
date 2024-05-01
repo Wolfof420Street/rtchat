@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:thermal/thermal.dart';
+import 'package:wakelock/wakelock.dart';
 import 'package:rtchat/audio_channel.dart';
 import 'package:rtchat/components/activity_feed_panel.dart';
 import 'package:rtchat/components/auth/twitch.dart';
@@ -162,6 +164,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  final _thermal = Thermal();
+
   @override
   void initState() {
     super.initState();
@@ -172,17 +177,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       debugPrint("Post frame callback post executed");
       final model = Provider.of<AudioModel>(context, listen: false);
       final ttsModel = Provider.of<TtsModel>(context, listen: false);
-
-      NotificationsPlugin.listenToTTs(ttsModel);
-
+      final layoutModel = Provider.of<LayoutModel>(context, listen: false);
       if (model.sources.isEmpty || (await AudioChannel.hasPermission())) {
         return;
       }
       if (mounted) {
         debugPrint("Conditions passed");
         model.showAudioPermissionDialog(context);
+        debugPrint("Directly calling listenToTTs");
+        NotificationsPlugin.listenToTTs(ttsModel);
+        initializeThermal(ttsModel, layoutModel);
       }
     });
+  }
+
+  void initializeThermal(TtsModel model, LayoutModel layoutModel) async {
+    _thermal.onBatteryTemperatureChanged.listen((double temperature) async {
+      if (temperature > 45) {
+        layoutModel.isShowPreview = false;
+
+        updateChannelSubscription("");
+        await TextToSpeechPlugin.speak("Text to speech disabled");
+        await TextToSpeechPlugin.disableTTS();
+        NotificationsPlugin.cancelNotification();
+      }
+    });
+
+    _thermal.onThermalStatusChanged.listen((ThermalStatus state) {
+      if (layoutModel.isShowPreview) {
+        _showThermalWarning();
+      }
+    });
+  }
+
+  void _showThermalWarning() {
+    final snackBar = SnackBar(
+      content: Text(AppLocalizations.of(context)?.streamPreviewMessage ?? ''),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -193,9 +226,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final orientation = mediaQuery.orientation;
-    final width = mediaQuery.size.width;
+    final orientation = MediaQuery.of(context).orientation;
 
     return GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -233,20 +264,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       },
                     );
                   }),
-                  if (width > 400)
-                    Consumer<LayoutModel>(
-                        builder: (context, layoutModel, child) {
-                      return IconButton(
-                        icon: Icon(layoutModel.isShowPreview
-                            ? Icons.preview
-                            : Icons.preview_outlined),
-                        tooltip: AppLocalizations.of(context)!.streamPreview,
-                        onPressed: () {
-                          layoutModel.isShowPreview =
-                              !layoutModel.isShowPreview;
-                        },
-                      );
-                    }),
+                  Consumer<LayoutModel>(builder: (context, layoutModel, child) {
+                    return IconButton(
+                      icon: Icon(layoutModel.isShowPreview
+                          ? Icons.preview
+                          : Icons.preview_outlined),
+                      tooltip: AppLocalizations.of(context)!.streamPreview,
+                      onPressed: () {
+                        layoutModel.isShowPreview = !layoutModel.isShowPreview;
+                      },
+                    );
+                  }),
                   Consumer<TtsModel>(
                     builder: (context, ttsModel, child) {
                       return IconButton(
@@ -285,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       );
                     },
                   ),
-                  if (userModel.isSignedIn() && width > 400)
+                  if (userModel.isSignedIn())
                     IconButton(
                       icon: const Icon(Icons.people),
                       tooltip: AppLocalizations.of(context)!.currentViewers,

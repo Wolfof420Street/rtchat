@@ -375,12 +375,7 @@ class TtsModel extends ChangeNotifier {
     _pending.clear();
   }
 
-  void updateFromJson(Map<String, dynamic> json) {
-    _updateFromJsonInternal(json);
-    notifyListeners();
-  }
-
-  void _updateFromJsonInternal(Map<String, dynamic> json) {
+  TtsModel.fromJson(Map<String, dynamic> json) {
     if (json['isBotMuted'] != null) {
       _isBotMuted = json['isBotMuted'];
     }
@@ -411,10 +406,6 @@ class TtsModel extends ChangeNotifier {
         _mutedUsers.add(TwitchUserModel.fromJson(user));
       }
     }
-  }
-
-  TtsModel.fromJson(Map<String, dynamic> json) {
-    _updateFromJsonInternal(json);
   }
 
   Map<String, dynamic> toJson() => {
