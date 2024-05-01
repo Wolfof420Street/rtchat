@@ -36,7 +36,7 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         handleIntent()
-       
+
     }
 
     private fun startNotificationService() {
@@ -74,7 +74,7 @@ class MainActivity : FlutterActivity() {
                     startService(intent)
                     result.success(true)
                 }
-                "showNotification" -> {                  
+                "showNotification" -> {
                     startNotificationService()
                     result.success(true)
                 }

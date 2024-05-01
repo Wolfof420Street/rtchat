@@ -31,7 +31,7 @@ class TextToSpeechPlugin {
   static Future<Map<String, String>> getLanguages() async {
     try {
       final Map<dynamic, dynamic> languageMap =
-          await channel.invokeMethod('getLanguages');
+      await channel.invokeMethod('getLanguages');
       return Map<String, String>.from(languageMap);
     } catch (e) {
       debugPrint("getLanguages error: $e");

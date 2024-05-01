@@ -63,7 +63,7 @@ void updateChannelSubscription(String? data) {
 }
 
 StreamController<String> channelStreamController =
-    StreamController<String>.broadcast();
+StreamController<String>.broadcast();
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -88,7 +88,7 @@ void main() async {
   // persistence isn't useful to us since we're using Firestore as an event
   // stream and it uses memory/cache space.
   FirebaseFirestore.instance.settings =
-      const Settings(persistenceEnabled: false);
+  const Settings(persistenceEnabled: false);
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -113,7 +113,7 @@ class App extends StatefulWidget {
   final StreamingSharedPreferences prefs;
 
   static final observer =
-      FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
+  FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
 
   const App({super.key, required this.prefs});
 
@@ -244,17 +244,17 @@ class _AppState extends State<App> {
         }),
         ChangeNotifierProxyProvider<UserModel, TwitchBadgeModel>(
             create: (context) {
-          final model = TwitchBadgeModel.fromJson(jsonDecode(widget.prefs
-              .getString("twitch_badge", defaultValue: '{}')
-              .getValue()));
-          model.channel =
-              Provider.of<UserModel>(context, listen: false).activeChannel;
-          return model
-            ..addListener(() {
-              widget.prefs
-                  .setString('twitch_badge', jsonEncode(model.toJson()));
-            });
-        }, update: (context, userModel, model) {
+              final model = TwitchBadgeModel.fromJson(jsonDecode(widget.prefs
+                  .getString("twitch_badge", defaultValue: '{}')
+                  .getValue()));
+              model.channel =
+                  Provider.of<UserModel>(context, listen: false).activeChannel;
+              return model
+                ..addListener(() {
+                  widget.prefs
+                      .setString('twitch_badge', jsonEncode(model.toJson()));
+                });
+            }, update: (context, userModel, model) {
           model!.channel = userModel.activeChannel;
           return model;
         }),
@@ -336,11 +336,11 @@ class _AppState extends State<App> {
             '/settings/chat-history': (context) => const ChatHistoryScreen(),
             '/settings/text-to-speech': (context) => const TextToSpeechScreen(),
             '/settings/text-to-speech/cloud-tts': (context) =>
-                const CloudTtsPurchasesScreen(),
+            const CloudTtsPurchasesScreen(),
             '/settings/text-to-speech/languages': (context) =>
-                const LanguagesScreen(),
+            const LanguagesScreen(),
             '/settings/text-to-speech/voices': (context) =>
-                const VoicesScreen(),
+            const VoicesScreen(),
             '/settings/quick-links': (context) => const QuickLinksScreen(),
             '/settings/backup': (context) => const BackupScreen(),
             '/settings/third-party': (context) => const ThirdPartyScreen(),
@@ -348,16 +348,16 @@ class _AppState extends State<App> {
             '/settings/events/follow': (context) => const FollowEventScreen(),
             '/settings/events/cheer': (context) => const CheerEventScreen(),
             '/settings/events/subscription': (context) =>
-                const SubscriptionEventScreen(),
+            const SubscriptionEventScreen(),
             '/settings/events/raid': (context) => const RaidEventScreen(),
             '/settings/events/channel-point': (context) =>
-                const ChannelPointRedemptionEventScreen(),
+            const ChannelPointRedemptionEventScreen(),
             '/settings/events/poll': (context) => const PollEventScreen(),
             '/settings/events/host': (context) => const HostEventScreen(),
             '/settings/events/hypetrain': (context) =>
-                const HypetrainEventScreen(),
+            const HypetrainEventScreen(),
             '/settings/events/prediction': (context) =>
-                const PredictionEventScreen(),
+            const PredictionEventScreen(),
             '/settings/events/raiding': (context) => const RaidingEventScreen(),
           },
         );
