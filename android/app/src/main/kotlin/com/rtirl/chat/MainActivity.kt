@@ -183,13 +183,6 @@ class TextToSpeechPlugin(private val context: Context) : MethodCallHandler, Text
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
-            "updateTTSPreferences" -> {
-                val pitch = call.argument<Double?>("pitch")
-                val speed = call.argument<Double?>("speed")
-                if (pitch != null && speed != null) {
-                    updateTTSPreferences(pitch.toFloat(), speed.toFloat())
-                }
-            }
             "speak" -> {
                 val text = call.argument<String>("text")
                 val speed = call.argument<Double?>("speed")
@@ -219,6 +212,7 @@ class TextToSpeechPlugin(private val context: Context) : MethodCallHandler, Text
         }
     }
 
+<<<<<<< HEAD
     private fun updateTTSPreferences(pitch: Float, speed: Float) {
         tts?.setPitch(pitch)
         tts?.setSpeechRate(speed)
@@ -234,6 +228,14 @@ class TextToSpeechPlugin(private val context: Context) : MethodCallHandler, Text
                         (audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) * volume).toInt(),
                         0
                     )
+=======
+    fun speak(text: String, result: Result) {
+        if (!text.isNullOrBlank()) {
+            val utteranceId = UUID.randomUUID().toString()
+            tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                override fun onStart(utteranceId: String) {
+                   
+>>>>>>> baadeef (local battery)
                 }
             }
 

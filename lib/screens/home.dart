@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -165,6 +167,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  final Battery _battery = Battery();
+
+  BatteryState? _batteryState;
+  StreamSubscription<BatteryState>? _batteryStateSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -184,8 +191,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       if (mounted) {
         debugPrint("Conditions passed");
         model.showAudioPermissionDialog(context);
+        checkAndHandleBatteryLevel(ttsModel);
       }
     });
+  }
+
+  Future<void> checkAndHandleBatteryLevel(TtsModel model) async {
+    final int batteryLevel = await _battery.batteryLevel;
+    final bool isCharging = _batteryState == BatteryState.charging;
+
+    if (batteryLevel < 5 && !isCharging) {
+         if (model.enabled) {
+        if(mounted) {
+            model.setEnabled(AppLocalizations.of(context)!,false);
+        }
+      
+        updateChannelSubscription("");
+        await TextToSpeechPlugin.speak("Text to speech disabled");
+        await TextToSpeechPlugin.disableTTS();
+        NotificationsPlugin.cancelNotification();
+      }
+    }
   }
 
   @override

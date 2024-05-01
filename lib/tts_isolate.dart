@@ -75,14 +75,14 @@ Future<void> isolateMain(
                     message: messageData['message'],
                     reply: messageData['reply'] != null
                         ? TwitchMessageReplyModel(
-                            messageId: messageData['reply']['messageId'],
-                            message: messageData['reply']['message'],
-                            author: TwitchUserModel(
-                              userId: messageData['reply']['userId'],
-                              displayName: messageData['reply']['displayName'],
-                              login: messageData['reply']['userLogin'],
-                            ),
-                          )
+                      messageId: messageData['reply']['messageId'],
+                      message: messageData['reply']['message'],
+                      author: TwitchUserModel(
+                        userId: messageData['reply']['userId'],
+                        displayName: messageData['reply']['displayName'],
+                        login: messageData['reply']['userLogin'],
+                      ),
+                    )
                         : null,
                     tags: messageData['tags'],
                     annotations: TwitchMessageAnnotationsModel.fromMap(
