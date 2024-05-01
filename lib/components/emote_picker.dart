@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:rtchat/components/image/cross_fade_image.dart';
 import 'package:rtchat/models/channels.dart';
@@ -70,11 +68,8 @@ class EmotesList extends StatelessWidget {
                         onPressed: () => onEmoteSelected(emote),
                         splashRadius: 24,
                         icon: CrossFadeImage(
-                          placeholder: emote.image.placeholderImage,
-                          image: emote.image,
-                          width: 36,
-                          height: 36,
-                        )));
+                            placeholder: emote.image.placeholderImage,
+                            image: emote.image)));
               }).toList(),
             )),
           );
@@ -153,7 +148,6 @@ class EmotePickerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final rowNumber =
         MediaQuery.of(context).orientation == Orientation.portrait ? 6 : 4;
-    final maxHeight = MediaQuery.of(context).size.height * 0.5;
 
     return PopScope(
       canPop: false,
@@ -161,7 +155,7 @@ class EmotePickerWidget extends StatelessWidget {
         onEmoteSelected(null);
       },
       child: SizedBox(
-        height: min(48 * rowNumber.toDouble(), maxHeight),
+        height: 48 * rowNumber.toDouble(),
         child: FutureBuilder<List<Emote>>(
             future: getEmotes(channel),
             initialData: const [],

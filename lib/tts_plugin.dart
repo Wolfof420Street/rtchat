@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:rtchat/main.dart';
 import 'package:rtchat/notifications_plugin.dart';
@@ -9,20 +8,11 @@ import 'package:rtchat/notifications_plugin.dart';
 class TextToSpeechPlugin {
   static const MethodChannel channel = MethodChannel('ttsPlugin');
 
-  static Future<void> updateTTSPreferences(double pitch, double speed) async {
-    try {
-      await channel.invokeMethod(
-          'updateTTSPreferences', {'pitch': pitch, 'speed': speed});
-    } catch (e) {
-      debugPrint("updateTTSPreferences error: $e");
-    }
-  }
-
   static Future<void> speak(String text) async {
     try {
       await channel.invokeMethod('speak', {'text': text});
     } catch (e) {
-      debugPrint("speak error: $e");
+      // Handle the error
     }
   }
 
@@ -32,7 +22,7 @@ class TextToSpeechPlugin {
           await channel.invokeMethod('getLanguages');
       return Map<String, String>.from(languageMap);
     } catch (e) {
-      debugPrint("getLanguages error: $e");
+      // Handle the error
       return <String, String>{};
     }
   }
@@ -41,7 +31,7 @@ class TextToSpeechPlugin {
     try {
       await channel.invokeMethod('stopSpeaking');
     } catch (e) {
-      debugPrint("stopSpeaking error: $e");
+      // Handle the error
     }
   }
 
@@ -49,7 +39,7 @@ class TextToSpeechPlugin {
     try {
       await channel.invokeMethod('disableTTS');
     } catch (e) {
-      debugPrint("disableTTS error: $e");
+      // Handle the error
     }
   }
 
@@ -57,7 +47,7 @@ class TextToSpeechPlugin {
     try {
       await channel.invokeMethod('clear');
     } catch (e) {
-      debugPrint("clear error: $e");
+      // Handle the error
     }
   }
 }

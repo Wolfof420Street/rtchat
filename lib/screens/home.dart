@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:wakelock/wakelock.dart';
 import 'package:rtchat/audio_channel.dart';
 import 'package:rtchat/components/activity_feed_panel.dart';
 import 'package:rtchat/components/auth/twitch.dart';
@@ -24,7 +26,6 @@ import 'package:rtchat/models/tts.dart';
 import 'package:rtchat/models/user.dart';
 import 'package:rtchat/notifications_plugin.dart';
 import 'package:rtchat/tts_plugin.dart';
-import 'package:wakelock/wakelock.dart';
 
 class ResizableWidget extends StatefulWidget {
   final bool resizable;
@@ -162,6 +163,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  final Battery _battery = Battery();
+
+  BatteryState? _batteryState;
+  StreamSubscription<BatteryState>? _batteryStateSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -173,29 +180,52 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final model = Provider.of<AudioModel>(context, listen: false);
       final ttsModel = Provider.of<TtsModel>(context, listen: false);
 
+      debugPrint("Directly calling listenToTTs");
       NotificationsPlugin.listenToTTs(ttsModel);
+
+      _batteryStateSubscription =
+          _battery.onBatteryStateChanged.listen((BatteryState state) {
+        checkAndHandleBatteryLevel(ttsModel);
+      });
 
       if (model.sources.isEmpty || (await AudioChannel.hasPermission())) {
         return;
       }
+
       if (mounted) {
-        debugPrint("Conditions passed");
         model.showAudioPermissionDialog(context);
       }
     });
+  }
+
+  Future<void> checkAndHandleBatteryLevel(TtsModel model) async {
+    final int batteryLevel = await _battery.batteryLevel;
+    final bool isCharging = _batteryState == BatteryState.charging;
+
+    if (batteryLevel < 5 && !isCharging) {
+      if (model.enabled) {
+        model.enabled = false;
+        updateChannelSubscription("");
+        await TextToSpeechPlugin.speak("Text to speech disabled");
+        await TextToSpeechPlugin.disableTTS();
+        NotificationsPlugin.cancelNotification();
+      }
+    }
   }
 
   @override
   void dispose() {
     Wakelock.disable();
     super.dispose();
+
+    if (_batteryStateSubscription != null) {
+      _batteryStateSubscription!.cancel();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final orientation = mediaQuery.orientation;
-    final width = mediaQuery.size.width;
+    final orientation = MediaQuery.of(context).orientation;
 
     return GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -233,20 +263,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       },
                     );
                   }),
-                  if (width > 400)
-                    Consumer<LayoutModel>(
-                        builder: (context, layoutModel, child) {
-                      return IconButton(
-                        icon: Icon(layoutModel.isShowPreview
-                            ? Icons.preview
-                            : Icons.preview_outlined),
-                        tooltip: AppLocalizations.of(context)!.streamPreview,
-                        onPressed: () {
-                          layoutModel.isShowPreview =
-                              !layoutModel.isShowPreview;
-                        },
-                      );
-                    }),
+                  Consumer<LayoutModel>(builder: (context, layoutModel, child) {
+                    return IconButton(
+                      icon: Icon(layoutModel.isShowPreview
+                          ? Icons.preview
+                          : Icons.preview_outlined),
+                      tooltip: AppLocalizations.of(context)!.streamPreview,
+                      onPressed: () {
+                        layoutModel.isShowPreview = !layoutModel.isShowPreview;
+                      },
+                    );
+                  }),
                   Consumer<TtsModel>(
                     builder: (context, ttsModel, child) {
                       return IconButton(
@@ -255,37 +282,36 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             : Icons.voice_over_off),
                         tooltip: AppLocalizations.of(context)!.textToSpeech,
                         onPressed: () async {
-                          if (!kDebugMode) {
+                          setState(() {
                             ttsModel.enabled = !ttsModel.enabled;
+                          });
+                          if (!ttsModel.enabled) {
+                            updateChannelSubscription("");
+                            await TextToSpeechPlugin.speak(
+                                "Text to speech disabled");
+                            await TextToSpeechPlugin.disableTTS();
+                            NotificationsPlugin.cancelNotification();
                           } else {
-                            if (!ttsModel.enabled) {
-                              updateChannelSubscription("");
-                              await TextToSpeechPlugin.speak(
-                                  "Text to speech disabled");
-                              await TextToSpeechPlugin.disableTTS();
-                              NotificationsPlugin.cancelNotification();
-                            } else {
-                              channelStreamController.stream
-                                  .listen((currentChannel) {
-                                if (currentChannel.isEmpty) {
-                                  setState(() {
-                                    ttsModel.enabled = false;
-                                  });
-                                }
-                              });
-                              await TextToSpeechPlugin.speak(
-                                  "Text to speech enabled");
-                              updateChannelSubscription(
-                                  "${userModel.activeChannel?.provider}:${userModel.activeChannel?.channelId}");
-                              NotificationsPlugin.showNotification();
-                              NotificationsPlugin.listenToTTs(ttsModel);
-                            }
+                            channelStreamController.stream
+                                .listen((currentChannel) {
+                              if (currentChannel.isEmpty) {
+                                setState(() {
+                                  ttsModel.enabled = false;
+                                });
+                              }
+                            });
+                            await TextToSpeechPlugin.speak(
+                                "Text to speech enabled");
+                            updateChannelSubscription(
+                                "${userModel.activeChannel?.provider}:${userModel.activeChannel?.channelId}");
+                            NotificationsPlugin.showNotification();
+                            NotificationsPlugin.listenToTTs(ttsModel);
                           }
                         },
                       );
                     },
                   ),
-                  if (userModel.isSignedIn() && width > 400)
+                  if (userModel.isSignedIn())
                     IconButton(
                       icon: const Icon(Icons.people),
                       tooltip: AppLocalizations.of(context)!.currentViewers,
