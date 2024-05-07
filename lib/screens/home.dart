@@ -166,7 +166,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-   final _thermal = Thermal();
+  final _thermal = Thermal();
 
   @override
   void initState() {
@@ -178,8 +178,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       debugPrint("Post frame callback post executed");
       final model = Provider.of<AudioModel>(context, listen: false);
       final ttsModel = Provider.of<TtsModel>(context, listen: false);
-      final layoutModel = Provider.of<LayoutModel>(context, listen: false);
-      
+       final layoutModel = Provider.of<LayoutModel>(context, listen: false);
+
+
       NotificationsPlugin.listenToTts(ttsModel);
 
       if (model.sources.isEmpty || (await AudioChannel.hasPermission())) {
@@ -191,22 +192,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         initializeThermal(ttsModel, layoutModel);
       }
     });
-
-
   }
 
-  @override
-  void dispose() {
-    WakelockPlus.disable();
-    super.dispose();
-  }
-
-   void initializeThermal(TtsModel model, LayoutModel layoutModel) async {
+  void initializeThermal(TtsModel model, LayoutModel layoutModel) async {
     _thermal.onBatteryTemperatureChanged.listen((double temperature) async {
       if (temperature > 45) {
         layoutModel.isShowPreview = false;
 
         updateChannelSubscription("");
+        await TextToSpeechPlugin.speak("Text to speech disabled");
         await TextToSpeechPlugin.disableTTS();
         NotificationsPlugin.cancelNotification();
       }
@@ -225,6 +219,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+
+  @override
+  void dispose() {
+    WakelockPlus.disable();
+    super.dispose();
   }
 
   @override
