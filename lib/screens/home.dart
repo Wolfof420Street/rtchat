@@ -213,8 +213,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       }
     }
   }
-
-  @override
+ @override
   void dispose() {
     WakelockPlus.disable();
     super.dispose();
