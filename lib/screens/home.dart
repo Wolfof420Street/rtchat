@@ -25,6 +25,7 @@ import 'package:rtchat/models/tts.dart';
 import 'package:rtchat/models/user.dart';
 import 'package:rtchat/notifications_plugin.dart';
 import 'package:rtchat/tts_plugin.dart';
+import 'package:thermal/thermal.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ResizableWidget extends StatefulWidget {
@@ -165,6 +166,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+   final _thermal = Thermal();
+
   @override
   void initState() {
     super.initState();
@@ -175,7 +178,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       debugPrint("Post frame callback post executed");
       final model = Provider.of<AudioModel>(context, listen: false);
       final ttsModel = Provider.of<TtsModel>(context, listen: false);
-
+      final layoutModel = Provider.of<LayoutModel>(context, listen: false);
+      
       NotificationsPlugin.listenToTts(ttsModel);
 
       if (model.sources.isEmpty || (await AudioChannel.hasPermission())) {
@@ -184,14 +188,43 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       if (mounted) {
         debugPrint("Conditions passed");
         model.showAudioPermissionDialog(context);
+        initializeThermal(ttsModel, layoutModel);
       }
     });
+
+
   }
 
   @override
   void dispose() {
     WakelockPlus.disable();
     super.dispose();
+  }
+
+   void initializeThermal(TtsModel model, LayoutModel layoutModel) async {
+    _thermal.onBatteryTemperatureChanged.listen((double temperature) async {
+      if (temperature > 45) {
+        layoutModel.isShowPreview = false;
+
+        updateChannelSubscription("");
+        await TextToSpeechPlugin.disableTTS();
+        NotificationsPlugin.cancelNotification();
+      }
+    });
+
+    _thermal.onThermalStatusChanged.listen((ThermalStatus state) {
+      if (layoutModel.isShowPreview) {
+        _showThermalWarning();
+      }
+    });
+  }
+
+  void _showThermalWarning() {
+    final snackBar = SnackBar(
+      content: Text(AppLocalizations.of(context)?.streamPreviewMessage ?? ''),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
