@@ -177,20 +177,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       debugPrint("Post frame callback post executed");
       final model = Provider.of<AudioModel>(context, listen: false);
       final ttsModel = Provider.of<TtsModel>(context, listen: false);
-<<<<<<< thermal
       final layoutModel = Provider.of<LayoutModel>(context, listen: false);
-=======
 
       NotificationsPlugin.listenToTTs(ttsModel);
 
->>>>>>> main
       if (model.sources.isEmpty || (await AudioChannel.hasPermission())) {
         return;
       }
       if (mounted) {
         debugPrint("Conditions passed");
         model.showAudioPermissionDialog(context);
-<<<<<<< thermal
         debugPrint("Directly calling listenToTTs");
         NotificationsPlugin.listenToTTs(ttsModel);
         initializeThermal(ttsModel, layoutModel);
@@ -207,8 +203,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         await TextToSpeechPlugin.speak("Text to speech disabled");
         await TextToSpeechPlugin.disableTTS();
         NotificationsPlugin.cancelNotification();
-=======
->>>>>>> main
       }
     });
 
