@@ -178,13 +178,14 @@ class _ScrollToBottomWidget extends StatelessWidget {
         child: ElevatedButton(
             onPressed: onPressed,
             style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
               shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(32))),
               padding: const EdgeInsets.all(16),
             ),
             child: Row(
               children: [
-                const Icon(Icons.arrow_downward),
+                const Icon(Icons.arrow_downward, color: Colors.white),
                 child ?? Container(),
               ],
             )),
@@ -443,6 +444,7 @@ class _ChatPanelWidgetState extends State<ChatPanelWidget>
                               .newMessageCount(dropped),
                           textAlign: TextAlign.center,
                           maxLines: 1,
+                          style: const TextStyle(color: Colors.white),
                         )),
             ),
           ]);

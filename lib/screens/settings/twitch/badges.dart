@@ -11,59 +11,72 @@ class TwitchBadgesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TwitchBadgeModel>(builder: (context, model, child) {
-      final badges = model.badgeSets;
-      badges.sort(badgePriorityComparator);
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.twitchBadges),
-          actions: [
-            GestureDetector(
-              onTap: () => model.setAllEnabled(model.enabledCount == 0),
-              child: Row(children: [
-                Text(AppLocalizations.of(context)!.selectAll),
-                Checkbox.adaptive(
-                  tristate: true,
-                  value: model.enabledCount == 0
-                      ? false
-                      : (model.enabledCount == model.badgeCount ? true : null),
-                  onChanged: (value) {
-                    model.setAllEnabled(value ?? false);
-                  },
+    final theme = Theme.of(context);
+    return Scaffold(
+      body: SafeArea(
+        top: false,
+        child: Consumer<TwitchBadgeModel>(builder: (context, model, child) {
+          final badges = model.badgeSets;
+          badges.sort(badgePriorityComparator);
+          return CustomScrollView(slivers: <Widget>[
+            SliverAppBar(
+                pinned: true,
+                expandedHeight: 250.0,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text(AppLocalizations.of(context)!.twitchBadges),
                 ),
-                const SizedBox(width: 20),
-              ]),
+                actions: [
+                  Row(children: [
+                    Text(AppLocalizations.of(context)!.selectAll),
+                    Theme(
+                      data: theme.copyWith(
+                          unselectedWidgetColor: theme.colorScheme.onTertiary),
+                      child: Checkbox.adaptive(
+                        tristate: true,
+                        value: model.enabledCount == 0
+                            ? false
+                            : (model.enabledCount == model.badgeCount
+                                ? true
+                                : null),
+                        onChanged: (value) {
+                          model.setAllEnabled(value ?? false);
+                        },
+                      ),
+                    )
+                  ]),
+                ]),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final badge = badges[index];
+                  final lastVersion = badge.versions.last;
+                  final image =
+                      ResilientNetworkImage(Uri.parse(lastVersion.imageUrl4x));
+                  return CheckboxListTile.adaptive(
+                      secondary: CrossFadeImage(
+                          alignment: Alignment.center,
+                          placeholder: image.placeholderImage,
+                          image: image,
+                          height: 36),
+                      title: Text(lastVersion.title,
+                          overflow: TextOverflow.ellipsis),
+                      subtitle: lastVersion.description == lastVersion.title ||
+                              lastVersion.description.trim().isEmpty
+                          ? null
+                          : Text(lastVersion.description,
+                              overflow: TextOverflow.ellipsis),
+                      value: model.isEnabled(badge.setId),
+                      onChanged: (value) {
+                        model.setEnabled(badge.setId, value ?? false);
+                      });
+                },
+                childCount: badges.length,
+              ),
             ),
-          ],
-        ),
-        body: ListView.builder(
-          itemCount: badges.length,
-          itemBuilder: (context, index) {
-            final badge = badges[index];
-            final lastVersion = badge.versions.last;
-            final image =
-                ResilientNetworkImage(Uri.parse(lastVersion.imageUrl4x));
-            return CheckboxListTile.adaptive(
-                secondary: CrossFadeImage(
-                    alignment: Alignment.center,
-                    placeholder: image.placeholderImage,
-                    image: image,
-                    width: 36,
-                    height: 36),
-                title: Text(lastVersion.title, overflow: TextOverflow.ellipsis),
-                subtitle: lastVersion.description == lastVersion.title ||
-                        lastVersion.description.trim().isEmpty
-                    ? null
-                    : Text(lastVersion.description,
-                        overflow: TextOverflow.ellipsis),
-                value: model.isEnabled(badge.setId),
-                onChanged: (value) {
-                  model.setEnabled(badge.setId, value ?? false);
-                });
-          },
-        ),
-      );
-    });
+          ]);
+        }),
+      ),
+    );
   }
 
   static int badgePriorityComparator(TwitchBadgeInfo a, TwitchBadgeInfo b) {

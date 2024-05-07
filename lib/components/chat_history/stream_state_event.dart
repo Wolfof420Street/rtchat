@@ -11,7 +11,8 @@ class StreamStateEventWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        child: SizedBox(
+        child: Container(
+          color: Theme.of(context).dividerColor,
           width: double.infinity,
           child: Padding(
               padding: const EdgeInsets.all(8),
