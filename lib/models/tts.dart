@@ -20,13 +20,16 @@ import 'package:rtchat/models/user.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class TtsModel extends ChangeNotifier {
+ 
   var _isCloudTtsEnabled = false;
+  
   final _tts = FlutterTts()
     ..setSharedInstance(true)
     ..setIosAudioCategory(
         IosTextToSpeechAudioCategory.playback,
         [IosTextToSpeechAudioCategoryOptions.mixWithOthers],
         IosTextToSpeechAudioMode.voicePrompt);
+  
 
   final audioPlayer = AudioPlayer();
   Future<void> _previousUtterance = Future.value();
@@ -42,6 +45,7 @@ class TtsModel extends ChangeNotifier {
   var _speed = Platform.isAndroid ? 0.8 : 0.395;
   var _pitch = 1.0;
   var _isEnabled = false;
+  var _useNewTts = false;
   final Set<TwitchUserModel> _mutedUsers = {};
   // this is used to ignore messages in the past.
   var _lastMessageTime = DateTime.now();
@@ -86,11 +90,13 @@ class TtsModel extends ChangeNotifier {
     if (!isCloudTtsEnabled) {
       return;
     }
+
     final voicesJson = await FirebaseFunctions.instance
         .httpsCallable("getVoices")
         .call(<String, dynamic>{
       "language": _language.languageCode,
     });
+
     final data = voicesJson.data;
 
     final List<String> voicesList = [];
@@ -142,6 +148,13 @@ class TtsModel extends ChangeNotifier {
 
   bool get enabled {
     return _isEnabled;
+  }
+
+  bool get useNewTts => _useNewTts;
+
+  set useNewTts(bool value) {
+    _useNewTts = value;
+    notifyListeners();
   }
 
   set enabled(bool value) {

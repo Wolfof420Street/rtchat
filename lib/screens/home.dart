@@ -161,7 +161,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -255,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             : Icons.voice_over_off),
                         tooltip: AppLocalizations.of(context)!.textToSpeech,
                         onPressed: () async {
-                          if (!kDebugMode) {
+                          if (!ttsModel.useNewTts) {
                             ttsModel.enabled = !ttsModel.enabled;
                           } else {
                             if (!ttsModel.enabled) {
