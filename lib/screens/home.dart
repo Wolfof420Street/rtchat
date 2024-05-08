@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:wakelock/wakelock.dart';
 import 'package:rtchat/audio_channel.dart';
 import 'package:rtchat/components/activity_feed_panel.dart';
 import 'package:rtchat/components/auth/twitch.dart';
@@ -26,6 +26,7 @@ import 'package:rtchat/models/tts.dart';
 import 'package:rtchat/models/user.dart';
 import 'package:rtchat/notifications_plugin.dart';
 import 'package:rtchat/tts_plugin.dart';
+import 'package:wakelock/wakelock.dart';
 
 class ResizableWidget extends StatefulWidget {
   final bool resizable;
@@ -35,14 +36,15 @@ class ResizableWidget extends StatefulWidget {
   final Function(double) onResizeWidth;
   final Widget child;
 
-  const ResizableWidget(
-      {super.key,
-      required this.resizable,
-      required this.height,
-      required this.width,
-      required this.onResizeHeight,
-      required this.onResizeWidth,
-      required this.child});
+  const ResizableWidget({
+    Key? key,
+    required this.resizable,
+    required this.height,
+    required this.width,
+    required this.onResizeHeight,
+    required this.onResizeWidth,
+    required this.child,
+  }) : super(key: key);
 
   @override
   State<ResizableWidget> createState() => _ResizableWidgetState();
@@ -66,7 +68,9 @@ class _ResizableWidgetState extends State<ResizableWidget> {
       return Column(children: [
         SizedBox(
           height: _height.clamp(
-              57, math.max(57, MediaQuery.of(context).size.height - 300)),
+            57,
+            math.max(57, MediaQuery.of(context).size.height - 300),
+          ),
           child: widget.child,
         ),
         if (widget.resizable)
@@ -78,7 +82,9 @@ class _ResizableWidgetState extends State<ResizableWidget> {
             },
             onVerticalDragEnd: (details) {
               widget.onResizeHeight(_height.clamp(
-                  57, math.max(57, MediaQuery.of(context).size.height - 300)));
+                57,
+                math.max(57, MediaQuery.of(context).size.height - 300),
+              ));
             },
             onVerticalDragUpdate: (details) {
               setState(() {
@@ -100,7 +106,9 @@ class _ResizableWidgetState extends State<ResizableWidget> {
       return Row(children: [
         SizedBox(
           width: _width.clamp(
-              57, math.max(57, MediaQuery.of(context).size.width - 400)),
+            57,
+            math.max(57, MediaQuery.of(context).size.width - 400),
+          ),
           child: widget.child,
         ),
         if (widget.resizable)
@@ -118,9 +126,9 @@ class _ResizableWidgetState extends State<ResizableWidget> {
                   ..onEnd = (details) {
                     widget.onResizeWidth(
                       _width.clamp(
-                          57,
-                          math.max(
-                              57, MediaQuery.of(context).size.width - 400)),
+                        57,
+                        math.max(57, MediaQuery.of(context).size.width - 400),
+                      ),
                     );
                   }
                   ..onUpdate = (details) {
@@ -151,11 +159,12 @@ class HomeScreen extends StatefulWidget {
   final Channel channel;
   final void Function(Channel) onChannelSelect;
 
-  const HomeScreen(
-      {required this.isDiscoModeEnabled,
-      required this.channel,
-      required this.onChannelSelect,
-      super.key});
+  const HomeScreen({
+    required this.isDiscoModeEnabled,
+    required this.channel,
+    required this.onChannelSelect,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -163,7 +172,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-
   final Battery _battery = Battery();
   BatteryState? _batteryState;
   StreamSubscription<BatteryState>? _batteryStateSubscription;
@@ -172,22 +180,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     Wakelock.enable();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
       debugPrint("Post frame callback executed");
       if (!mounted) return;
       debugPrint("Post frame callback post executed");
       final model = Provider.of<AudioModel>(context, listen: false);
       final ttsModel = Provider.of<TtsModel>(context, listen: false);
-      
+
+      NotificationsPlugin.listenToTTs(ttsModel);
+
       if (model.sources.isEmpty || (await AudioChannel.hasPermission())) {
         return;
       }
       if (mounted) {
         debugPrint("Conditions passed");
         model.showAudioPermissionDialog(context);
-        debugPrint("Directly calling listenToTTs");
-        NotificationsPlugin.listenToTTs(ttsModel);
-         _battery.batteryState.then(_updateBatteryState);
+        _battery.batteryState.then(_updateBatteryState);
         _batteryStateSubscription =
             _battery.onBatteryStateChanged.listen(_updateBatteryState);
       }
@@ -208,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final int batteryLevel = await _battery.batteryLevel;
     final bool isCharging = state == BatteryState.charging;
 
-    if(!mounted) {
+    if (!mounted) {
       return;
     }
 
@@ -227,30 +235,38 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
 
     if (batteryLevel < 5) {
-      disableStreamPreview();
+      _disableStreamPreview();
     }
   }
+
+
+  void _disableStreamPreview() {
+    final layoutModel = Provider.of<LayoutModel>(context, listen: false);
+    layoutModel.isShowPreview = false;
+  }
+
+
 
   void _showBatteryWarning() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text(
-        AppLocalizations.of(context)!.streamPreviewMessage,
-      )),
+        content: Text(
+          AppLocalizations.of(context)!.streamPreviewMessage,
+        ),
+      ),
     );
-  }
-
-  void disableStreamPreview() {
-    Provider.of<LayoutModel>(context, listen: false).isShowPreview = false;
   }
 
   @override
   Widget build(BuildContext context) {
-    final orientation = MediaQuery.of(context).orientation;
+    final mediaQuery = MediaQuery.of(context);
+    final orientation = mediaQuery.orientation;
+    final width = mediaQuery.size.width;
 
     return GestureDetector(
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: Consumer<UserModel>(builder: (context, userModel, child) {
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Consumer<UserModel>(
+        builder: (context, userModel, child) {
           return Scaffold(
             key: _scaffoldKey,
             drawer: Sidebar(channel: widget.channel),
@@ -265,11 +281,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             onEndDrawerChanged: (isOpened) =>
                 FocusManager.instance.primaryFocus?.unfocus(),
             appBar: HeaderBarWidget(
-                onChannelSelect: widget.onChannelSelect,
-                channel: widget.channel,
-                actions: [
-                  Consumer2<ActivityFeedModel, LayoutModel>(builder:
-                      (context, activityFeedModel, layoutModel, child) {
+              onChannelSelect: widget.onChannelSelect,
+              channel: widget.channel,
+              actions: [
+                Consumer2<ActivityFeedModel, LayoutModel>(
+                  builder: (context, activityFeedModel, layoutModel, child) {
                     if (!activityFeedModel.isEnabled) {
                       return Container();
                     }
@@ -283,29 +299,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             !layoutModel.isShowNotifications;
                       },
                     );
-                  }),
-                  Consumer<LayoutModel>(builder: (context, layoutModel, child) {
-                    return IconButton(
-                      icon: Icon(layoutModel.isShowPreview
-                          ? Icons.preview
-                          : Icons.preview_outlined),
-                      tooltip: AppLocalizations.of(context)!.streamPreview,
-                      onPressed: () {
-                        layoutModel.isShowPreview = !layoutModel.isShowPreview;
-                      },
-                    );
-                  }),
-                  Consumer<TtsModel>(
-                    builder: (context, ttsModel, child) {
+                  },
+                ),
+                if (width > 400)
+                  Consumer<LayoutModel>(
+                    builder: (context, layoutModel, child) {
                       return IconButton(
-                        icon: Icon(ttsModel.enabled
-                            ? Icons.record_voice_over
-                            : Icons.voice_over_off),
-                        tooltip: AppLocalizations.of(context)!.textToSpeech,
-                        onPressed: () async {
-                          setState(() {
-                            ttsModel.enabled = !ttsModel.enabled;
-                          });
+                        icon: Icon(layoutModel.isShowPreview
+                            ? Icons.preview
+                            : Icons.preview_outlined),
+                        tooltip: AppLocalizations.of(context)!.streamPreview,
+                        onPressed: () {
+                          layoutModel.isShowPreview =
+                              !layoutModel.isShowPreview;
+                        },
+                      );
+                    },
+                  ),
+                Consumer<TtsModel>(
+                  builder: (context, ttsModel, child) {
+                    return IconButton(
+                      icon: Icon(ttsModel.enabled
+                          ? Icons.record_voice_over
+                          : Icons.voice_over_off),
+                      tooltip: AppLocalizations.of(context)!.textToSpeech,
+                      onPressed: () async {
+                        if (!kDebugMode) {
+                          ttsModel.enabled = !ttsModel.enabled;
+                        } else {
                           if (!ttsModel.enabled) {
                             updateChannelSubscription("");
                             await TextToSpeechPlugin.speak(
@@ -328,19 +349,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             NotificationsPlugin.showNotification();
                             NotificationsPlugin.listenToTTs(ttsModel);
                           }
-                        },
-                      );
+                        }
+                      },
+                    );
+                  },
+                ),
+                if (userModel.isSignedIn() && width > 400)
+                  IconButton(
+                    icon: const Icon(Icons.people),
+                    tooltip: AppLocalizations.of(context)!.currentViewers,
+                    onPressed: () {
+                      _scaffoldKey.currentState?.openEndDrawer();
                     },
                   ),
-                  if (userModel.isSignedIn())
-                    IconButton(
-                      icon: const Icon(Icons.people),
-                      tooltip: AppLocalizations.of(context)!.currentViewers,
-                      onPressed: () {
-                        _scaffoldKey.currentState?.openEndDrawer();
-                      },
-                    ),
-                ]),
+              ],
+            ),
             body: Container(
               height: MediaQuery.of(context).size.height,
               color: Theme.of(context).scaffoldBackgroundColor,
@@ -355,20 +378,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         if (!userModel.isSignedIn()) {
                           return Column(children: [
                             Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Flexible(child: Divider()),
-                                  Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Text(
-                                          AppLocalizations.of(context)!
-                                              .signInToSendMessages,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelLarge)),
-                                  const Flexible(child: Divider()),
-                                ]),
-                             SignInWithTwitch(),
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Flexible(child: Divider()),
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Text(
+                                    AppLocalizations.of(context)!
+                                        .signInToSendMessages,
+                                    style:
+                                        Theme.of(context).textTheme.labelLarge,
+                                  ),
+                                ),
+                                const Flexible(child: Divider()),
+                              ],
+                            ),
+                            const SignInWithTwitch(),
                           ]);
                         }
 
@@ -382,41 +407,42 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     return Consumer<LayoutModel>(
                         builder: (context, layoutModel, child) {
                       return Column(
-                          verticalDirection: VerticalDirection.up,
-                          children: [
-                            // reversed direction because of verticalDirection: VerticalDirection.up
-                            chatPanelFooter,
-
-                            Expanded(
-                                child: DiscoWidget(
-                                    isEnabled: widget.isDiscoModeEnabled,
-                                    child: ChatPanelWidget(
-                                        channel: widget.channel))),
-
-                            Consumer<LayoutModel>(
-                                builder: (context, layoutModel, child) {
-                              if (layoutModel.isShowNotifications) {
-                                return ResizableWidget(
-                                    resizable: !layoutModel.locked,
-                                    height: layoutModel.panelHeight,
-                                    width: layoutModel.panelWidth,
-                                    onResizeHeight: (height) {
-                                      layoutModel.panelHeight = height;
-                                    },
-                                    onResizeWidth: (width) {
-                                      layoutModel.panelWidth = width;
-                                    },
-                                    child: const ActivityFeedPanelWidget());
-                              } else if (layoutModel.isShowPreview) {
-                                return AspectRatio(
-                                    aspectRatio: 16 / 9,
-                                    child:
-                                        StreamPreview(channel: widget.channel));
-                              } else {
-                                return Container();
-                              }
-                            }),
-                          ]);
+                        verticalDirection: VerticalDirection.up,
+                        children: [
+                          // reversed direction because of verticalDirection: VerticalDirection.up
+                          chatPanelFooter,
+                          Expanded(
+                            child: DiscoWidget(
+                              isEnabled: widget.isDiscoModeEnabled,
+                              child: ChatPanelWidget(channel: widget.channel),
+                            ),
+                          ),
+                          Consumer<LayoutModel>(
+                              builder: (context, layoutModel, child) {
+                            if (layoutModel.isShowNotifications) {
+                              return ResizableWidget(
+                                resizable: !layoutModel.locked,
+                                height: layoutModel.panelHeight,
+                                width: layoutModel.panelWidth,
+                                onResizeHeight: (height) {
+                                  layoutModel.panelHeight = height;
+                                },
+                                onResizeWidth: (width) {
+                                  layoutModel.panelWidth = width;
+                                },
+                                child: const ActivityFeedPanelWidget(),
+                              );
+                            } else if (layoutModel.isShowPreview) {
+                              return AspectRatio(
+                                aspectRatio: 16 / 9,
+                                child: StreamPreview(channel: widget.channel),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          }),
+                        ],
+                      );
                     });
                   } else {
                     // landscape
@@ -428,41 +454,48 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           return Container();
                         }
                         return ResizableWidget(
-                            resizable: !layoutModel.locked,
-                            height: layoutModel.panelHeight,
-                            width: layoutModel.panelWidth,
-                            onResizeHeight: (height) {
-                              layoutModel.panelHeight = height;
-                            },
-                            onResizeWidth: (width) {
-                              layoutModel.panelWidth = width;
-                            },
-                            child: Consumer<LayoutModel>(
-                                builder: (context, layoutModel, child) {
-                              if (layoutModel.isShowNotifications) {
-                                return const ActivityFeedPanelWidget();
-                              } else if (layoutModel.isShowPreview) {
-                                return StreamPreview(channel: widget.channel);
-                              } else {
-                                return Container();
-                              }
-                            }));
+                          resizable: !layoutModel.locked,
+                          height: layoutModel.panelHeight,
+                          width: layoutModel.panelWidth,
+                          onResizeHeight: (height) {
+                            layoutModel.panelHeight = height;
+                          },
+                          onResizeWidth: (width) {
+                            layoutModel.panelWidth = width;
+                          },
+                          child: Consumer<LayoutModel>(
+                              builder: (context, layoutModel, child) {
+                            if (layoutModel.isShowNotifications) {
+                              return const ActivityFeedPanelWidget();
+                            } else if (layoutModel.isShowPreview) {
+                              return StreamPreview(channel: widget.channel);
+                            } else {
+                              return Container();
+                            }
+                          }),
+                        );
                       }),
                       Expanded(
-                          child: Column(children: [
-                        Expanded(
-                            child: DiscoWidget(
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: DiscoWidget(
                                 isEnabled: widget.isDiscoModeEnabled,
-                                child:
-                                    ChatPanelWidget(channel: widget.channel))),
-                        chatPanelFooter,
-                      ]))
+                                child: ChatPanelWidget(channel: widget.channel),
+                              ),
+                            ),
+                            chatPanelFooter,
+                          ],
+                        ),
+                      ),
                     ]);
                   }
                 }),
               ),
             ),
           );
-        }));
+        },
+      ),
+    );
   }
 }
