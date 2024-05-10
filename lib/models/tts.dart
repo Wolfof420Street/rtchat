@@ -166,6 +166,7 @@ class TtsModel extends ChangeNotifier {
       _lastMessageTime = DateTime.now();
     }
     say(
+       
         SystemMessageModel(
             text: "Text to speech ${value ? "enabled" : "disabled"}"),
         force: true);
@@ -286,6 +287,10 @@ class TtsModel extends ChangeNotifier {
   void say(MessageModel model, {bool force = false}) async {
     if (!enabled && !force) {
       return;
+    }
+
+     if(_useNewTts) {
+          return;
     }
 
     if (model is TwitchMessageModel) {
