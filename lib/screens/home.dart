@@ -26,6 +26,8 @@ import 'package:rtchat/models/user.dart';
 import 'package:rtchat/notifications_plugin.dart';
 import 'package:rtchat/tts_plugin.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:rtchat/volume_plugin.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ResizableWidget extends StatefulWidget {
   final bool resizable;
@@ -247,6 +249,55 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         onPressed: () {
                           layoutModel.isShowPreview =
                               !layoutModel.isShowPreview;
+                        },
+                      );
+                    }),
+                  Consumer<TtsModel>(
+                    builder: (context, ttsModel, child) {
+                      return IconButton(
+                        icon: Icon(
+                          !kDebugMode
+                              ? (ttsModel.enabled
+                                  ? Icons.record_voice_over
+                                  : Icons.voice_over_off)
+                              : (ttsModel.newTtsEnabled
+                                  ? Icons.record_voice_over
+                                  : Icons.voice_over_off),
+                        ),
+                        tooltip: AppLocalizations.of(context)!.textToSpeech,
+                        onPressed: () async {
+                          if (!kDebugMode) {
+                            ttsModel.setEnabled(AppLocalizations.of(context)!,
+                                ttsModel.enabled ? false : true);
+                          } else {
+                            // Toggle newTtsEnabled and notify listeners immediately
+                            ttsModel.newTtsEnabled = !ttsModel.newTtsEnabled;
+
+                            if (!ttsModel.newTtsEnabled) {
+                              updateChannelSubscription("");
+                              await TextToSpeechPlugin.speak(
+                                  "Text to speech disabled");
+                              await TextToSpeechPlugin.disableTTS();
+                              NotificationsPlugin.cancelNotification();
+                              VolumePlugin.reduceVolumeOnTtsStart();
+                            } else {
+                              // Start listening to the stream before toggling newTtsEnabled
+                              channelStreamController.stream
+                                  .listen((currentChannel) {
+                                if (currentChannel.isEmpty) {
+                                  ttsModel.newTtsEnabled = false;
+                                }
+                              });
+                              await TextToSpeechPlugin.speak(
+                                  "Text to speech enabled");
+                              updateChannelSubscription(
+                                "${userModel.activeChannel?.provider}:${userModel.activeChannel?.channelId}",
+                              );
+                              NotificationsPlugin.showNotification();
+                              VolumePlugin.increaseVolumeOnTtsStop();
+                              NotificationsPlugin.listenToTts(ttsModel);
+                            }
+                          }
                         },
                       );
                     },
