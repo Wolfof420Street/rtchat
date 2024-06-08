@@ -19,6 +19,8 @@ import 'package:rtchat/models/user.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../volume_plugin.dart';
+
 class TtsModel extends ChangeNotifier {
   var _isCloudTtsEnabled = false;
   final _tts = FlutterTts()
@@ -172,6 +174,11 @@ class TtsModel extends ChangeNotifier {
     _isEnabled = value;
     if (value) {
       _lastMessageTime = DateTime.now();
+    }
+    if(value) {
+        VolumePlugin.reduceVolumeOnTtsStart();
+    } else {
+      VolumePlugin.increaseVolumeOnTtsStop();
     }
     say(
         localizations,

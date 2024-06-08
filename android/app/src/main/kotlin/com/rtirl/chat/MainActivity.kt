@@ -25,8 +25,31 @@ import java.util.Locale
 import java.util.UUID
 
 class MainActivity : FlutterActivity() {
+import android.os.Bundle
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.AudioManager.OnAudioFocusChangeListener
+import android.media.AudioFocusRequest
+import android.os.Handler
+import android.os.Looper 
+
+class MainActivity : FlutterActivity(), AudioManager.OnAudioFocusChangeListener {
 
     private var sharedData: String = ""
+
+    private val audioAttributes = AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
+        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+        .build()
+
+    private lateinit var audioManager: AudioManager
+    private lateinit var focusRequest: AudioFocusRequest
+    private val handler = Handler(Looper.getMainLooper())
+    private var playbackDelayed = false
 
     companion object {
         var methodChannel: MethodChannel? = null
@@ -36,7 +59,15 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         handleIntent()
-       
+        
+
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+            setAudioAttributes(audioAttributes)
+            setAcceptsDelayedFocusGain(true)
+            setOnAudioFocusChangeListener(this@MainActivity, handler)
+            build()
+        }
     }
 
     private fun startNotificationService() {
@@ -46,6 +77,21 @@ class MainActivity : FlutterActivity() {
         } else {
             intent.putExtra("action", "showNotification")
             startService(intent)
+        }
+    }
+
+    override fun onAudioFocusChange(focusChange: Int) {
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                if (playbackDelayed) {
+                    playbackDelayed = false
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS,
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                // Handle audio focus loss
+            }
         }
     }
 
@@ -61,11 +107,19 @@ class MainActivity : FlutterActivity() {
             "tts_notifications"
         )
 
+        val volumeChannel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "volume_channel"
+        )
+
         methodChannel = notificationChannel
 
         notificationChannel.setMethodCallHandler { call, result ->
             Log.d("NotificationService", "startForeground called")
-            Log.d("Notification called", call.method)
+            
+
+            Log.d("Notification called", call.method);
+
             when (call.method) {
                 "dismissNotification" -> {
                     val intent = Intent(this, NotificationService::class.java)
@@ -76,7 +130,40 @@ class MainActivity : FlutterActivity() {
                 }
                 "showNotification" -> {                  
                     startNotificationService()
+                "showNotification" -> {
+                    val intent = Intent(this, NotificationService::class.java)
+                    intent.putExtra("action", "showNotification")
+                    startService(intent)
                     result.success(true)
+                }
+                else -> result.notImplemented()
+            }
+        }
+
+        volumeChannel.setMethodCallHandler { call, result ->
+
+            Log.d("Volume called", call.method);
+
+            when (call.method) {
+
+                "tts_on" -> {
+                    val res = audioManager.requestAudioFocus(focusRequest)
+                    when (res) {
+                        AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                            methodChannel?.invokeMethod("audioFocus", "gained")
+                            Log.d("Permisssion granted", "response granted")
+                        }
+                        AudioManager.AUDIOFOCUS_REQUEST_DELAYED -> {
+                            playbackDelayed = true
+                            methodChannel?.invokeMethod("audioFocus", "delayed")
+                        }
+                        else -> methodChannel?.invokeMethod("audioFocus", "failed")
+                    }
+                }
+                "tts_off" -> {
+                    audioManager.abandonAudioFocusRequest(focusRequest)
+                    methodChannel?.invokeMethod("audioFocus", "lost")
+
                 }
                 else -> result.notImplemented()
             }
@@ -127,6 +214,7 @@ class MainActivity : FlutterActivity() {
                     )
                 }
                 else -> result.notImplemented()
+
             }
         }
 
@@ -237,14 +325,16 @@ class TextToSpeechPlugin(private val context: Context) : MethodCallHandler, Text
                 }
             }
 
-            override fun onDone(utteranceId: String) {
-                result.success(true)
-            }
-
-            override fun onError(utteranceId: String) {
-                dismissTTSNotification(result)
-            }
-        })
+                override fun onDone(utteranceId: String) {
+                    result.success(true)
+                }
+                
+                override fun onError(utteranceId: String) {
+                    // Speech encountered an error
+                    // Handle errors as needed
+                    dismissTTSNotification(result)
+                }
+            })
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val params = Bundle()
