@@ -19,6 +19,8 @@ import 'package:rtchat/models/tts/bytes_audio_source.dart';
 import 'package:rtchat/models/user.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import '../volume_plugin.dart';
+
 class TtsModel extends ChangeNotifier {
   var _isCloudTtsEnabled = false;
   final _tts = FlutterTts()
@@ -151,6 +153,11 @@ class TtsModel extends ChangeNotifier {
     _isEnabled = value;
     if (value) {
       _lastMessageTime = DateTime.now();
+    }
+    if(value) {
+        VolumePlugin.reduceVolumeOnTtsStart();
+    } else {
+      VolumePlugin.increaseVolumeOnTtsStop();
     }
     say(
         SystemMessageModel(
