@@ -40,6 +40,7 @@ class MainActivity : FlutterActivity(), AudioManager.OnAudioFocusChangeListener 
     private lateinit var focusRequest: AudioFocusRequest
     private val handler = Handler(Looper.getMainLooper())
     private var playbackDelayed = false
+    private var wasDucking = false 
 
     companion object {
         var methodChannel: MethodChannel? = null
@@ -68,17 +69,27 @@ class MainActivity : FlutterActivity(), AudioManager.OnAudioFocusChangeListener 
     override fun onAudioFocusChange(focusChange: Int) {
         when (focusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
+               
+                if (wasDucking) {
+                    methodChannel?.invokeMethod("audioVolume", 1.0) 
+                    wasDucking = false 
+                }
                 if (playbackDelayed) {
                     playbackDelayed = false
+                   
                 }
-                // Restore the volume when audio focus is gained
-                audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
             }
-            AudioManager.AUDIOFOCUS_LOSS,
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                // Lower the volume when audio focus is lost
-                audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
+              
+                methodChannel?.invokeMethod("audioVolume", 0.3) 
+                wasDucking = true
+            }
+            AudioManager.AUDIOFOCUS_LOSS, 
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> { 
+              
+                if (!wasDucking) {
+                    
+                }
             }
         }
     }
