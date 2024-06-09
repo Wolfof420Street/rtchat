@@ -62,7 +62,7 @@ class MainActivity : FlutterActivity(), AudioManager.OnAudioFocusChangeListener 
         
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
+        focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).run {
             setAudioAttributes(audioAttributes)
             setAcceptsDelayedFocusGain(true)
             setOnAudioFocusChangeListener(this@MainActivity, handler)
@@ -86,11 +86,14 @@ class MainActivity : FlutterActivity(), AudioManager.OnAudioFocusChangeListener 
                 if (playbackDelayed) {
                     playbackDelayed = false
                 }
+                // Restore the volume when audio focus is gained
+                audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
             }
             AudioManager.AUDIOFOCUS_LOSS,
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                // Handle audio focus loss
+                // Lower the volume when audio focus is lost
+                audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
             }
         }
     }
@@ -141,11 +144,7 @@ class MainActivity : FlutterActivity(), AudioManager.OnAudioFocusChangeListener 
         }
 
         volumeChannel.setMethodCallHandler { call, result ->
-
-            Log.d("Volume called", call.method);
-
             when (call.method) {
-
                 "tts_on" -> {
                     val res = audioManager.requestAudioFocus(focusRequest)
                     when (res) {
@@ -163,7 +162,6 @@ class MainActivity : FlutterActivity(), AudioManager.OnAudioFocusChangeListener 
                 "tts_off" -> {
                     audioManager.abandonAudioFocusRequest(focusRequest)
                     methodChannel?.invokeMethod("audioFocus", "lost")
-
                 }
                 else -> result.notImplemented()
             }
@@ -214,7 +212,6 @@ class MainActivity : FlutterActivity(), AudioManager.OnAudioFocusChangeListener 
                     )
                 }
                 else -> result.notImplemented()
-
             }
         }
 
