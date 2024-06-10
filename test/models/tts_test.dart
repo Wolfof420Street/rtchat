@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rtchat/tts_plugin.dart';
+import 'package:rtchat/volume_plugin.dart';
 
 void main() {
   final ttsQueue = TTSQueue();
@@ -11,17 +12,27 @@ void main() {
 
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(TextToSpeechPlugin.channel,
-            (MethodCall method) async {
-      return null;
-    });
-  });
+     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(TextToSpeechPlugin.channel, (MethodCall method) async {
+    return null;
+     });
 
-  tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(TextToSpeechPlugin.channel, null);
+      .setMockMethodCallHandler(VolumePlugin.channel, (MethodCall method) async {
+    if (method.method == 'tts_on' || method.method == 'tts_off') {
+      return null; // Mock response for volume channel methods
+    }
+    throw MissingPluginException('No implementation found for method ${method.method} on channel ${VolumePlugin.channel.name}');
   });
+});
+
+tearDown(() {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(TextToSpeechPlugin.channel, null);
+
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(VolumePlugin.channel, null);
+});
 
   test('Speak adds elements to the queue', () async {
     final future1 = ttsQueue.speak('1', 'First message');
