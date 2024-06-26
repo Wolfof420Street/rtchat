@@ -26,7 +26,6 @@ import 'package:rtchat/notifications_plugin.dart';
 import 'package:rtchat/tts_plugin.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:rtchat/volume_plugin.dart';
-import 'package:wakelock/wakelock.dart';
 
 class ResizableWidget extends StatefulWidget {
   final bool resizable;
