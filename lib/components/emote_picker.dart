@@ -32,53 +32,83 @@ class EmotesList extends StatelessWidget {
     });
     final categories = byCategory.keys.toList();
     categories.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    // ensure global emotes is first.
+
+    // Ensure global emotes is first.
     final globalEmotesIndex = categories.indexOf(globalEmotes);
     if (globalEmotesIndex != -1) {
       categories.removeAt(globalEmotesIndex);
       categories.insert(0, globalEmotes);
     }
-    // ensure channel emotes is second.
+
+    // Ensure channel emotes is second.
     final channelEmotesIndex = categories.indexOf(channel.displayName);
     if (channelEmotesIndex != -1) {
       categories.removeAt(channelEmotesIndex);
       categories.insert(1, channel.displayName);
     }
+
     return ListView.builder(
-        itemCount: byCategory.length,
-        itemBuilder: (context, index) {
-          return StickyHeader(
-            header: Container(
-              color: Theme.of(context).inputDecorationTheme.fillColor,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    categories[index],
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                  )),
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        return StickyHeader(
+          overlapHeaders: false,
+          header: Container(
+            width: MediaQuery.of(context).size.width,
+            color: Theme.of(context).inputDecorationTheme.fillColor,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                  top: 8.0, bottom: 24.0, left: 8.0, right: 8.0),
+              child: Container(
+                 width: MediaQuery.of(context).size.width,
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent, 
+                  borderRadius: BorderRadius.circular(4.0),
+                  border: Border.all(color: Colors.transparent),
+                 
+                ),
+                child: Text(
+                  categories[index],
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
             ),
-            content: Center(
-                child: Wrap(
-              children: byCategory[categories[index]]!.map((emote) {
-                return Tooltip(
+          ),
+          content: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: Center(
+              child: Wrap(
+                alignment: WrapAlignment.start,
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: byCategory[categories[index]]!.map((emote) {
+                  return Tooltip(
                     message: emote.code,
                     preferBelow: false,
                     child: IconButton(
-                        onPressed: () => onEmoteSelected(emote),
-                        splashRadius: 24,
-                        icon: CrossFadeImage(
-                          placeholder: emote.image.placeholderImage,
-                          image: emote.image,
-                          width: 36,
-                          height: 36,
-                        )));
-              }).toList(),
-            )),
-          );
-        });
+                      onPressed: () => onEmoteSelected(emote),
+                      splashRadius: 24,
+                      icon: CrossFadeImage(
+                        placeholder: emote.image.placeholderImage,
+                        image: emote.image,
+                        width: 36,
+                        height: 36,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 
