@@ -17,7 +17,6 @@ import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 final DateTime ttsTimeStampListener = DateTime.now();
 StreamSubscription? messagesSubscription;
 StreamSubscription? channelSubscription;
-
 @pragma("vm:entry-point")
 Future<void> isolateMain(
     SendPort sendPort,
@@ -88,18 +87,18 @@ Future<void> isolateMain(
                     timestamp: messageData['timestamp'].toDate(),
                     deleted: false,
                     channelId: messageData['channelId']);
-                // Check if the message is from a bot and if bot messages should be muted
+               
                 if (ttsModel.isBotMuted && messageModel.author.isBot) {
-                  return; // Skip vocalization for bot messages
+                  return; 
                 }
                 final finalMessage = ttsModel.getVocalization(
                   messageModel,
                   includeAuthorPrelude: !ttsModel.isPreludeMuted,
                 );
                 if (finalMessage.isNotEmpty) {
-                  // Pass the speech rate and volume values to the TTS engine before vocalizing.
+                 
                   await ttsQueue.speak(message.id, finalMessage,
-                      speed: ttsModel.speed, volume: ttsModel.pitch);
+                      speed: ttsModel.speed, volume: ttsModel.pitch, timestamp: messageModel.timestamp);
                 }
                 break;
               case "stream.offline":
