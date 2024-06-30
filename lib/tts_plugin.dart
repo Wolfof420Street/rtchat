@@ -63,7 +63,6 @@ class TextToSpeechPlugin {
     }
   }
 }
-
 class TTSQueue {
   final Queue<TTSQueueElement> queue = Queue<TTSQueueElement>();
   var _lastMessageTime = DateTime.now();
@@ -76,7 +75,7 @@ class TTSQueue {
     final completer = Completer<void>();
     final element = TTSQueueElement(id: id, text: text, completer: completer);
 
- 
+  
     if (timestamp != null && timestamp.isBefore(_lastMessageTime)) {
       return;
     }
@@ -100,11 +99,11 @@ class TTSQueue {
       if (queue.firstOrNull != element) {
         throw Exception('Message was deleted');
       }
-      await TextToSpeechPlugin.speak(text);
+      await TextToSpeechPlugin.speak(text, speed: speed ?? 1.5, volume: volume);
       completer.complete();
     } else {
       queue.addLast(element);
-      await TextToSpeechPlugin.speak(text);
+      await TextToSpeechPlugin.speak(text, speed: speed ?? 1.5, volume: volume);
       completer.complete();
     }
     queue.remove(element);
