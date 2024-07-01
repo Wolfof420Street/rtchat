@@ -54,34 +54,23 @@ class EmotesList extends StatelessWidget {
           overlapHeaders: false,
           header: Container(
             width: MediaQuery.of(context).size.width,
-            color: Theme.of(context).inputDecorationTheme.fillColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             alignment: Alignment.centerLeft,
             child: Padding(
-              padding: const EdgeInsets.only(
-                  top: 8.0, bottom: 24.0, left: 8.0, right: 8.0),
-              child: Container(
-                 width: MediaQuery.of(context).size.width,
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent, 
-                  borderRadius: BorderRadius.circular(4.0),
-                  border: Border.all(color: Colors.transparent),
-                 
-                ),
-                child: Text(
-                  categories[index],
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
-                  ),
+              padding: const EdgeInsets.only(top: 16.0, bottom: 8.0), // Adjusted padding
+              child: Text(
+                categories[index],
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.0,
                 ),
               ),
             ),
           ),
           content: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Adjusted padding
             child: Center(
               child: Wrap(
                 alignment: WrapAlignment.start,
