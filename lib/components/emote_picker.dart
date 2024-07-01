@@ -58,7 +58,7 @@ class EmotesList extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             alignment: Alignment.centerLeft,
             child: Padding(
-              padding: const EdgeInsets.only(top: 16.0, bottom: 8.0), // Adjusted padding
+              padding: const EdgeInsets.only(top: 16.0, bottom: 8.0), 
               child: Text(
                 categories[index],
                 style: TextStyle(
@@ -70,7 +70,7 @@ class EmotesList extends StatelessWidget {
             ),
           ),
           content: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Adjusted padding
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), 
             child: Center(
               child: Wrap(
                 alignment: WrapAlignment.start,
