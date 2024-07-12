@@ -13,6 +13,7 @@ import 'package:rtchat/models/messages/twitch/reply.dart';
 import 'package:rtchat/tts_plugin.dart';
 
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 final DateTime ttsTimeStampListener = DateTime.now();
 StreamSubscription? messagesSubscription;
@@ -22,7 +23,9 @@ StreamSubscription? channelSubscription;
 Future<void> isolateMain(
     SendPort sendPort,
     StreamController<String> channelStream,
-    StreamingSharedPreferences prefs) async {
+    StreamingSharedPreferences prefs, 
+    AppLocalizations localizations
+    ) async {
   DartPluginRegistrant.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -93,6 +96,7 @@ Future<void> isolateMain(
                   return; // Skip vocalization for bot messages
                 }
                 final finalMessage = ttsModel.getVocalization(
+                  localizations,
                   messageModel,
                   includeAuthorPrelude: !ttsModel.isPreludeMuted,
                 );

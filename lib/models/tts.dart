@@ -18,14 +18,13 @@ import 'package:rtchat/models/tts/language.dart';
 import 'package:rtchat/models/tts/bytes_audio_source.dart';
 import 'package:rtchat/models/user.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TtsModel extends ChangeNotifier {
   var _isCloudTtsEnabled = false;
   final _tts = FlutterTts()
     ..setSharedInstance(true)
-    ..setIosAudioCategory(
-        IosTextToSpeechAudioCategory.playback,
-        [IosTextToSpeechAudioCategoryOptions.mixWithOthers],
+    ..setIosAudioCategory(IosTextToSpeechAudioCategory.playback, [IosTextToSpeechAudioCategoryOptions.mixWithOthers],
         IosTextToSpeechAudioMode.voicePrompt);
 
   final audioPlayer = AudioPlayer();
@@ -63,8 +62,7 @@ class TtsModel extends ChangeNotifier {
         return;
       }
 
-      String? streamLanguage =
-          await ChannelsAdapter.instance.forChannel(channel).map((event) {
+      String? streamLanguage = await ChannelsAdapter.instance.forChannel(channel).map((event) {
         if (event is TwitchChannelMetadata) {
           return event.language;
         }
@@ -76,8 +74,7 @@ class TtsModel extends ChangeNotifier {
         return;
       }
 
-      _isSupportedLanguage =
-          !(streamLanguage == 'other' || streamLanguage == 'asl');
+      _isSupportedLanguage = !(streamLanguage == 'other' || streamLanguage == 'asl');
       language = _isSupportedLanguage ? Language(streamLanguage) : Language();
       notifyListeners();
     }
@@ -87,9 +84,7 @@ class TtsModel extends ChangeNotifier {
     if (!isCloudTtsEnabled) {
       return;
     }
-    final voicesJson = await FirebaseFunctions.instance
-        .httpsCallable("getVoices")
-        .call(<String, dynamic>{
+    final voicesJson = await FirebaseFunctions.instance.httpsCallable("getVoices").call(<String, dynamic>{
       "language": _language.languageCode,
     });
     final data = voicesJson.data;
@@ -105,8 +100,7 @@ class TtsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  String getVocalization(MessageModel model,
-      {bool includeAuthorPrelude = false}) {
+  String getVocalization(AppLocalizations localizations, MessageModel model, {bool includeAuthorPrelude = false}) {
     if (model is TwitchMessageModel) {
       final text = model.tokenized
           .where((token) =>
@@ -132,9 +126,12 @@ class TtsModel extends ChangeNotifier {
       if (!includeAuthorPrelude || isPreludeMuted) {
         return text;
       }
-      return model.isAction ? "$author $text" : "$author said $text";
+      return model.isAction ? localizations.actionMessage(author, text) : localizations.saidMessage(author, text);
     } else if (model is StreamStateEventModel) {
-      return model.isOnline ? "Stream is online" : "Stream is offline";
+      final timestamp = model.timestamp;
+      return model.isOnline
+          ? localizations.streamOnline(timestamp, timestamp)
+          : localizations.streamOffline(timestamp, timestamp);
     } else if (model is SystemMessageModel) {
       return model.text;
     }
@@ -160,22 +157,22 @@ class TtsModel extends ChangeNotifier {
     return _isEnabled;
   }
 
-  set enabled(bool value) {
-    if (value == _isEnabled) {
-      return;
-    }
-    _isEnabled = value;
-    if (value) {
-      _lastMessageTime = DateTime.now();
-    }
-    say(
-        SystemMessageModel(
-            text: "Text to speech ${value ? "enabled" : "disabled"}"),
-        force: true);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
+ void setEnabled(AppLocalizations localizations, bool value) {
+  if (value == _isEnabled) {
+    return;
   }
+  _isEnabled = value;
+  if (value) {
+    _lastMessageTime = DateTime.now();
+  }
+  say(localizations, SystemMessageModel(
+    text: value ? localizations.textToSpeechEnabled : localizations.textToSpeechDisabled
+  ), force: true);
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    notifyListeners();
+  });
+}
+
 
   Language get language {
     return _language;
@@ -286,15 +283,13 @@ class TtsModel extends ChangeNotifier {
     }
   }
 
-  void say(MessageModel model, {bool force = false}) async {
+  void say(AppLocalizations localizations, MessageModel model, {bool force = false}) async {
     if (!enabled && !force) {
       return;
     }
 
     if (model is TwitchMessageModel) {
-      if (_mutedUsers.any((user) =>
-          user.displayName?.toLowerCase() ==
-          model.author.displayName?.toLowerCase())) {
+      if (_mutedUsers.any((user) => user.displayName?.toLowerCase() == model.author.displayName?.toLowerCase())) {
         return;
       }
 
@@ -317,8 +312,11 @@ class TtsModel extends ChangeNotifier {
       includeAuthorPrelude = !(activeMessage.author == model.author);
     }
 
-    final vocalization =
-        getVocalization(model, includeAuthorPrelude: includeAuthorPrelude);
+    final vocalization = getVocalization(
+      localizations,
+      model,
+      includeAuthorPrelude: includeAuthorPrelude,
+    );
 
     // if the vocalization is empty, skip the message
     if (vocalization.isEmpty) {
@@ -335,8 +333,7 @@ class TtsModel extends ChangeNotifier {
 
     _activeMessage = model;
 
-    if ((_isEnabled || model is SystemMessageModel) &&
-        _pending.contains(model.messageId)) {
+    if ((_isEnabled || model is SystemMessageModel) && _pending.contains(model.messageId)) {
       // TODO: replace with subscription logic
       if (!_isCloudTtsEnabled) {
         try {
@@ -353,9 +350,7 @@ class TtsModel extends ChangeNotifier {
         if (model is TwitchMessageModel) {
           if (isRandomVoiceEnabled) {
             final name = model.author.displayName;
-            final hash = BigInt.parse(
-                sha1.convert(utf8.encode(name!)).toString(),
-                radix: 16);
+            final hash = BigInt.parse(sha1.convert(utf8.encode(name!)).toString(), radix: 16);
             voice = voices[hash.remainder(BigInt.from(voices.length)).toInt()];
             pitch = hash.remainder(BigInt.from(21)).toInt() / 5 - 2;
           } else {
@@ -363,8 +358,7 @@ class TtsModel extends ChangeNotifier {
             pitch = _pitch * 4 - 2;
           }
         }
-        final response =
-            await FirebaseFunctions.instance.httpsCallable("synthesize")({
+        final response = await FirebaseFunctions.instance.httpsCallable("synthesize")({
           "voice": voice ?? "en-US-WaveNet-F",
           "text": vocalization,
           "rate": _speed * 1.5 + 0.5,
