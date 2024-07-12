@@ -7,6 +7,7 @@ import 'package:rtchat/models/commands.dart';
 import 'package:rtchat/models/messages.dart';
 import 'package:rtchat/models/messages/twitch/emote.dart';
 
+
 enum _AutocompleteMode {
   none,
   emote,
@@ -90,30 +91,48 @@ class _AutocompleteWidgetState extends State<AutocompleteWidget> {
             if (!snapshot.hasData || lastToken.isEmpty) {
               return Container();
             }
-            return Row(
-              children: (snapshot.data as List<Emote>)
-                  .where((emote) => emote.code
-                      .toLowerCase()
-                      .startsWith(lastToken.toLowerCase()))
-                  .take(MediaQuery.of(context).size.width ~/ 48)
-                  .map((emote) {
-                return Expanded(
-                  child: IconButton(
+            return Center(
+              child: Wrap(
+                alignment: WrapAlignment.start,
+                children: (snapshot.data as List<Emote>)
+                    .where((emote) => emote.code
+                        .toLowerCase()
+                        .startsWith(lastToken.toLowerCase()))
+                    .take(MediaQuery.of(context).size.width ~/ 48)
+                    .map((emote) {
+                  return Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: IconButton(
                       tooltip: emote.code,
                       onPressed: () {
+                        
                         widget.controller.text = "${text.substring(
                           0,
                           text.length - lastToken.length,
                         )}${emote.code} ";
+
+                        
                         // move cursor position
                         widget.controller.selection =
                             TextSelection.fromPosition(TextPosition(
                                 offset: widget.controller.text.length));
                       },
-                      splashRadius: 24,
-                      icon: Image(image: ResilientNetworkImage(emote.uri))),
-                );
-              }).toList(),
+                      splashRadius: 12,
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                        maxWidth: 40,
+                        maxHeight: 40,
+                      ),
+                      icon: Image(
+                        image: ResilientNetworkImage(emote.uri),
+                        height: 40,
+                        width: 40,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
             );
           },
         );

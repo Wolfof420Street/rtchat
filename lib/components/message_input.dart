@@ -13,6 +13,8 @@ import 'package:rtchat/models/channels.dart';
 import 'package:rtchat/models/commands.dart';
 import 'package:rtchat/share_channel.dart';
 
+import 'emote_text_controller.dart';
+
 class MessageInputWidget extends StatefulWidget {
   final Channel channel;
 
@@ -37,8 +39,9 @@ const _greyscale = ColorFilter.matrix([
   0, 0, 0, 1, 0, // alpha
 ]);
 
+
 class _MessageInputWidgetState extends State<MessageInputWidget> {
-  final _textEditingController = TextEditingController();
+  final _emoteTextEditingController = EmoteTextEditingController();
   final _chatInputFocusNode = FocusNode();
   var _isEmotePickerVisible = false;
   var _isKeyboardVisible = false;
@@ -69,14 +72,14 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
   // Handles any shared data we may receive.
   void _handleSharedData(String sharedData) {
     setState(() {
-      _textEditingController.text = sharedData;
+      _emoteTextEditingController.text = sharedData;
     });
   }
 
   @override
   void dispose() {
     keyboardSubscription.cancel();
-    _textEditingController.dispose();
+    _emoteTextEditingController.dispose();
     super.dispose();
   }
 
@@ -91,7 +94,7 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
       commandsModel.addCommand(Command(value, DateTime.now()));
     }
     setState(() {
-      _textEditingController.clear();
+      _emoteTextEditingController.clear();
     });
     var done = false;
     await Future.wait([
@@ -135,8 +138,11 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
             });
             return;
           }
-          _textEditingController.text =
-              "${_textEditingController.text} ${emote.code}";
+          setState(() {
+            _emoteTextEditingController.addEmote(emote);
+          });
+          _emoteTextEditingController.text =
+              "${_emoteTextEditingController.text} ${emote.code}";
         });
   }
 
@@ -157,7 +163,7 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
             if (_isKeyboardVisible)
               Flexible(
                 child: AutocompleteWidget(
-                  controller: _textEditingController,
+                  controller: _emoteTextEditingController,
                   onSend: sendMessage,
                   channel: widget.channel,
                 ),
@@ -170,7 +176,7 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
                     color: Theme.of(context).splashColor),
                 child: TextField(
                   focusNode: _chatInputFocusNode,
-                  controller: _textEditingController,
+                  controller: _emoteTextEditingController,
                   textInputAction: TextInputAction.send,
                   maxLines: 6,
                   minLines: 1,
@@ -206,7 +212,7 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
                         color: Theme.of(context).colorScheme.primary,
                         splashRadius: 24,
                         onPressed: () =>
-                            sendMessage(_textEditingController.text),
+                            sendMessage(_emoteTextEditingController.text),
                       ),
                       border: InputBorder.none,
                       hintMaxLines: 1,
@@ -223,18 +229,6 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
                         }
                         return l10n.saySomethingYouLittleBitch;
                       }()),
-                  onChanged: (text) {
-                    final filtered = text.replaceAll('\n', ' ');
-                    if (filtered == text) {
-                      return;
-                    }
-                    setState(() {
-                      _textEditingController.value = TextEditingValue(
-                          text: filtered,
-                          selection: TextSelection.fromPosition(TextPosition(
-                              offset: _textEditingController.text.length)));
-                    });
-                  },
                   onSubmitted: sendMessage,
                   onTap: () {
                     setState(() => _isEmotePickerVisible = false);
