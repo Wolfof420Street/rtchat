@@ -100,7 +100,7 @@ class TtsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  String getVocalization(AppLocalizations localizations, MessageModel model, {bool includeAuthorPrelude = false}) {
+  String getVocalization(AppLocalizations l10n, MessageModel model, {bool includeAuthorPrelude = false}) {
     if (model is TwitchMessageModel) {
       final text = model.tokenized
           .where((token) =>
@@ -126,12 +126,12 @@ class TtsModel extends ChangeNotifier {
       if (!includeAuthorPrelude || isPreludeMuted) {
         return text;
       }
-      return model.isAction ? localizations.actionMessage(author, text) : localizations.saidMessage(author, text);
+      return model.isAction ? l10n.actionMessage(author, text) : l10n.saidMessage(author, text);
     } else if (model is StreamStateEventModel) {
       final timestamp = model.timestamp;
       return model.isOnline
-          ? localizations.streamOnline(timestamp, timestamp)
-          : localizations.streamOffline(timestamp, timestamp);
+          ? l10n.streamOnline(timestamp, timestamp)
+          : l10n.streamOffline(timestamp, timestamp);
     } else if (model is SystemMessageModel) {
       return model.text;
     }
