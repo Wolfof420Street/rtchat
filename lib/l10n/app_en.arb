@@ -986,12 +986,12 @@
     }
   },
   
-    "textToSpeechEnabled": "Text to speech enabled",
-    "textToSpeechDisabled": "Text to speech disabled",
-    "@textToSpeechEnabled": {
+  "textToSpeechEnabled": "Text to speech enabled",
+  "textToSpeechDisabled": "Text to speech disabled",
+  "@textToSpeechEnabled": {
       "description": "Message indicating that text to speech has been enabled"
     },
-    "@textToSpeechDisabled": {
+  "@textToSpeechDisabled": {
       "description": "Message indicating that text to speech has been disabled"
     
   }
