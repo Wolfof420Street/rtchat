@@ -32,14 +32,14 @@ class EmotesList extends StatelessWidget {
     final categories = byCategory.keys.toList();
     categories.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
-    // ensure global emotes is first.
+    // Ensure global emotes is first.
     final globalEmotesIndex = categories.indexOf(globalEmotes);
     if (globalEmotesIndex != -1) {
       categories.removeAt(globalEmotesIndex);
       categories.insert(0, globalEmotes);
     }
 
-    // ensure channel emotes is second.
+    // Ensure channel emotes is second.
     final channelEmotesIndex = categories.indexOf(channel.displayName);
     if (channelEmotesIndex != -1) {
       categories.removeAt(channelEmotesIndex);
@@ -80,8 +80,8 @@ class EmotesList extends StatelessWidget {
                     message: emote.code,
                     preferBelow: false,
                     child: SizedBox(
-                      // Adjust width for 6 emotes per row for a better layout
-                      width: (MediaQuery.of(context).size.width - 32) / 6 - 8,
+                      // Adjust width for 7 emotes per row
+                      width: (MediaQuery.of(context).size.width - 32) / 7 - 8,
                       height: 40,
                       child: IconButton(
                         onPressed: () => onEmoteSelected(emote),
