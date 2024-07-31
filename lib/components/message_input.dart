@@ -13,6 +13,8 @@ import 'package:rtchat/models/channels.dart';
 import 'package:rtchat/models/commands.dart';
 import 'package:rtchat/share_channel.dart';
 
+import 'emote_text_editing_controller.dart';
+
 class MessageInputWidget extends StatefulWidget {
   final Channel channel;
 
@@ -38,7 +40,7 @@ const _greyscale = ColorFilter.matrix([
 ]);
 
 class _MessageInputWidgetState extends State<MessageInputWidget> {
-  final _textEditingController = TextEditingController();
+  final _textEditingController = EmoteTextEditingController();
   final _chatInputFocusNode = FocusNode();
   var _isEmotePickerVisible = false;
   var _isKeyboardVisible = false;
@@ -135,8 +137,10 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
             });
             return;
           }
-          _textEditingController.text =
-              "${_textEditingController.text} ${emote.code}";
+
+          debugPrint("Emote Url : ${emote.imageUrl}");
+
+          _textEditingController.addEmote(emote);
         });
   }
 
