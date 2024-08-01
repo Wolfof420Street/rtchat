@@ -133,8 +133,8 @@ class TtsModel extends ChangeNotifier {
         return text;
       }
       return model.isAction
-          ? l10n.actionMessage(author, text)
-          : l10n.saidMessage(author, text);
+          ? l10n.actionMessage(author, text, author, text)
+          : l10n.saidMessage(author, text, author, text, '');
     } else if (model is StreamStateEventModel) {
       final timestamp = model.timestamp;
       return model.isOnline
