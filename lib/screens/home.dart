@@ -167,13 +167,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-<<<<<<< HEAD
-=======
   final Battery _battery = Battery();
   BatteryState? _batteryState;
   StreamSubscription<BatteryState>? _batteryStateSubscription;
 
->>>>>>> e538533 (power)
   @override
   void initState() {
     super.initState();
@@ -184,27 +181,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       debugPrint("Post frame callback post executed");
       final model = Provider.of<AudioModel>(context, listen: false);
       final ttsModel = Provider.of<TtsModel>(context, listen: false);
-<<<<<<< HEAD
 
       NotificationsPlugin.listenToTts(ttsModel);
 
-=======
       
->>>>>>> e538533 (power)
       if (model.sources.isEmpty || (await AudioChannel.hasPermission())) {
         return;
       }
       if (mounted) {
         debugPrint("Conditions passed");
         model.showAudioPermissionDialog(context);
-<<<<<<< HEAD
-=======
         debugPrint("Directly calling listenToTTs");
-        NotificationsPlugin.listenToTTs(ttsModel);
+        NotificationsPlugin.listenToTts(ttsModel);
          _battery.batteryState.then(_updateBatteryState);
         _batteryStateSubscription =
             _battery.onBatteryStateChanged.listen(_updateBatteryState);
->>>>>>> e538533 (power)
       }
     });
   }
