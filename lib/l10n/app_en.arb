@@ -3,6 +3,34 @@
   "@sendAMessage": {
     "description": "Message input field placeholder text"
   },
+    "justNow": "Just now",
+    "@justNow": {
+      "description": "Just now text"
+    },
+    "minutes": "minutes",
+    "@minutes": {
+      "description": "Minutes text"
+    },
+    "agoMesssageText": "ago",
+    "@agoMesssageText": {
+      "description": "Ago text"
+    },
+    "hours": "hours",
+    "@hours": {
+      "description": "Hours text"
+    },
+    "days": "days",
+    "@days": {
+      "description": "Days text"
+    },
+    "lastWeek": "Last week",
+    "@lastWeek": {
+      "description": "Last week text"
+    },
+    "weeks": "weeks",
+    "@weeks": {
+      "description": "Weeks text"
+    },
   "writeSomething": "Write something...",
   "@writeSomething": {
     "description": "Message input field placeholder text"
