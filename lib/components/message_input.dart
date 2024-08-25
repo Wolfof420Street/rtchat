@@ -270,7 +270,8 @@ class _MessageInputWidgetState extends State<MessageInputWidget> {
 
             if (isLandscape && _isKeyboardVisible)
 
-              Expanded(
+              Flexible(
+                fit: FlexFit.loose,
                 child: Container(
                   color: Colors.black.withOpacity(0.7),
                   padding: const EdgeInsets.all(8.0),
