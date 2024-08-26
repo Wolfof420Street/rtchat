@@ -440,8 +440,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
                           Expanded(
                             child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Expanded(
+                                Flexible(
                                   child: DiscoWidget(
                                     isEnabled: widget.isDiscoModeEnabled,
                                     child: ChatPanelWidget(
