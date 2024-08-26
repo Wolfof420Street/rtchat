@@ -409,8 +409,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         children: [
                           Consumer<LayoutModel>(
                             builder: (context, layoutModel, child) {
-                              if (!layoutModel.isShowNotifications &&
-                                  !layoutModel.isShowPreview) {
+                              if (!layoutModel.isShowNotifications && !layoutModel.isShowPreview) {
                                 return Container();
                               }
                               return ResizableWidget(
@@ -428,8 +427,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     if (layoutModel.isShowNotifications) {
                                       return const ActivityFeedPanelWidget();
                                     } else if (layoutModel.isShowPreview) {
-                                      return StreamPreview(
-                                          channel: widget.channel);
+                                      return StreamPreview(channel: widget.channel);
                                     } else {
                                       return Container();
                                     }
@@ -438,15 +436,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               );
                             },
                           ),
-                          Expanded(
+                          Expanded( // Ensure this widget takes only the available space
                             child: Column(
-                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Flexible(
+                                Expanded( // Ensure this widget takes only the available space
                                   child: DiscoWidget(
                                     isEnabled: widget.isDiscoModeEnabled,
-                                    child: ChatPanelWidget(
-                                        channel: widget.channel),
+                                    child: ChatPanelWidget(channel: widget.channel),
                                   ),
                                 ),
                                 chatPanelFooter,
@@ -455,6 +451,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
                         ],
                       );
+
                     }
                   },
                 ),
