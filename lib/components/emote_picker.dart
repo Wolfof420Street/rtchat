@@ -54,7 +54,7 @@ class EmotesList extends StatelessWidget {
           overlapHeaders: false,
           header: Container(
             width: MediaQuery.of(context).size.width,
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: Theme.of(context).splashColor,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             alignment: Alignment.centerLeft,
             child: Padding(
@@ -64,35 +64,34 @@ class EmotesList extends StatelessWidget {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
+                  fontSize: 13.0,  // Increased font size
                 ),
               ),
             ),
           ),
           content: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0,
+                vertical: 8.0),
             child: Center(
               child: Wrap(
                 alignment: WrapAlignment.start,
-                spacing: 8.0,
-                runSpacing: 8.0,
+                spacing: 12.0,
+                runSpacing: 12.0,
                 children: byCategory[categories[index]]!.map((emote) {
                   return Tooltip(
                     message: emote.code,
                     preferBelow: false,
                     child: SizedBox(
-                      // Adjust width for 7 emotes per row
                       width: (MediaQuery.of(context).size.width - 32) / 7 - 8,
-                      height: 36,
+                      height: 48,
                       child: IconButton(
                         onPressed: () => onEmoteSelected(emote),
                         splashRadius: 24,
                         icon: CrossFadeImage(
                           placeholder: emote.image.placeholderImage,
                           image: emote.image,
-                          width: 36,
-                          height: 36,
+                          width: 48,
+                          height: 48,
                         ),
                       ),
                     ),
@@ -191,7 +190,7 @@ class EmotePickerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rowNumber =
-        MediaQuery.of(context).orientation == Orientation.portrait ? 6 : 4;
+    MediaQuery.of(context).orientation == Orientation.portrait ? 6 : 4;
     final maxHeight = MediaQuery.of(context).size.height * 0.5;
 
     return PopScope(
