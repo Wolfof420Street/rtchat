@@ -75,23 +75,23 @@ class EmotesList extends StatelessWidget {
             child: Center(
               child: Wrap(
                 alignment: WrapAlignment.start,
-                spacing: 12.0,
-                runSpacing: 12.0,
+                spacing: 8.0,
+                runSpacing: 8.0,
                 children: byCategory[categories[index]]!.map((emote) {
                   return Tooltip(
                     message: emote.code,
                     preferBelow: false,
                     child: SizedBox(
                       width: (MediaQuery.of(context).size.width - 32) / 7 - 8,
-                      height: 55,
+                      height: 60,
                       child: IconButton(
                         onPressed: () => onEmoteSelected(emote),
-                        splashRadius: 30,
+                        splashRadius: 50,
                         icon: CrossFadeImage(
                           placeholder: emote.image.placeholderImage,
                           image: emote.image,
-                          width: 55,
-                          height: 55,
+                          width: 100,
+                          height: 100,
                         ),
                       ),
                     ),
