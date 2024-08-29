@@ -83,15 +83,15 @@ class EmotesList extends StatelessWidget {
                     preferBelow: false,
                     child: SizedBox(
                       width: (MediaQuery.of(context).size.width - 32) / 7 - 8,
-                      height: 48,
+                      height: 55,
                       child: IconButton(
                         onPressed: () => onEmoteSelected(emote),
-                        splashRadius: 24,
+                        splashRadius: 30,
                         icon: CrossFadeImage(
                           placeholder: emote.image.placeholderImage,
                           image: emote.image,
-                          width: 48,
-                          height: 48,
+                          width: 55,
+                          height: 55,
                         ),
                       ),
                     ),
