@@ -54,7 +54,7 @@ class EmotesList extends StatelessWidget {
           overlapHeaders: false,
           header: Container(
             width: MediaQuery.of(context).size.width,
-            color: Theme.of(context).splashColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             alignment: Alignment.centerLeft,
             child: Padding(
