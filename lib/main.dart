@@ -56,6 +56,8 @@ import 'package:rtchat/screens/settings/twitch/badges.dart';
 import 'package:rtchat/themes.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
+import 'components/channel_localization.dart';
+
 void updateChannelSubscription(String? data) {
   if (data != null) {
     channelStreamController.add(data);
@@ -130,6 +132,15 @@ class _AppState extends State<App> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => UserModel()),
+        ChangeNotifierProxyProvider<UserModel, ChannelLocalization>(
+          create: (context) => ChannelLocalization(),
+          update: (context, userModel, channelLocalization) {
+            if (userModel.activeChannel != null) {
+              channelLocalization!.setChannelLanguage(userModel.activeChannel!.language);
+            }
+            return channelLocalization!;
+          },
+        ),
         ChangeNotifierProvider(create: (context) {
           final model = ActivityFeedModel.fromJson(jsonDecode(widget.prefs
               .getString("activity_feed", defaultValue: '{}')
