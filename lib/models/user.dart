@@ -69,6 +69,7 @@ class UserModel extends ChangeNotifier {
 
   set activeChannel(Channel? channel) {
     _activeChannel = channel;
+    setChannelLanguage(channel?.language);
     notifyListeners();
   }
 
@@ -83,7 +84,7 @@ class UserModel extends ChangeNotifier {
 
   Locale getChannelLocale(BuildContext context) {
     if (_activeChannel?.language != null) {
-      return Locale(normalizeLanguageCode(_activeChannel!.language!));
+      return _channelLocale ?? Locale(normalizeLanguageCode(_activeChannel!.language!));
     }
     // Fallback to device locale
     return Localizations.localeOf(context);
