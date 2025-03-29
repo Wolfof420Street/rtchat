@@ -265,13 +265,7 @@ class TextToSpeechScreen extends StatelessWidget {
               },
             ),
 
-            SwitchListTile.adaptive(
-              title: const Text("Alerts only"),
-              value: model.isAlertsOnly,
-              onChanged: (value) {
-                model.setAlertsOnly(value);
-              },
-            ),
+
 
           ],
         );
