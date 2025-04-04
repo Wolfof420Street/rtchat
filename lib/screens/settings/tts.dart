@@ -264,9 +264,6 @@ class TextToSpeechScreen extends StatelessWidget {
                 model.isPreludeMuted = value;
               },
             ),
-
-
-
           ],
         );
       }),

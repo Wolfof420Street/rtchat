@@ -274,13 +274,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           return IconButton(
                             icon: Icon(
                               !kDebugMode
-                                  ? (
-                                  ttsModel.isAlertsOnly
+                                  ? (ttsModel.isAlertsOnly
                                       ? Icons.campaign
-                                      :
-                                  ttsModel.enabled
-                                      ? Icons.volume_up
-                                      : Icons.volume_off)
+                                      : ttsModel.enabled
+                                          ? Icons.volume_up
+                                          : Icons.volume_off)
                                   : (ttsModel.newTtsEnabled
                                       ? Icons.volume_up
                                       : Icons.volume_off),
@@ -288,26 +286,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             tooltip: AppLocalizations.of(context)!.textToSpeech,
                             onPressed: () async {
                               if (!kDebugMode) {
-                                final localizations = AppLocalizations.of(context)!;
+                                final localizations =
+                                    AppLocalizations.of(context)!;
 
                                 if (!ttsModel.enabled) {
-
-                                 ttsModel.setAlertsOnly(localizations, true);
-
+                                  ttsModel.setAlertsOnly(localizations, true);
                                 } else if (ttsModel.isAlertsOnly) {
-
                                   ttsModel.setEnabled(localizations, true);
 
                                   ttsModel.setAlertsOnly(localizations, false);
-
                                 } else {
-
                                   ttsModel.setEnabled(localizations, false);
-
                                 }
-
-
-
                               } else {
                                 ttsModel.newTtsEnabled =
                                     !ttsModel.newTtsEnabled;

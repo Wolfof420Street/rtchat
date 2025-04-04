@@ -156,24 +156,19 @@ class TtsModel extends ChangeNotifier {
   }
 
   void setAlertsOnly(AppLocalizations localizations, bool value) {
-
-
     if (value == _isAlertsOnly) {
       return;
     }
 
-    if(value) {
+    if (value) {
       _isEnabled = true;
     }
 
     _isAlertsOnly = value;
-   if(value) {
-     say(
-         localizations,
-         SystemMessageModel(
-             text:  localizations.alertsEnabled),
-         force: true);
-   }
+    if (value) {
+      say(localizations, SystemMessageModel(text: localizations.alertsEnabled),
+          force: true);
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
@@ -196,8 +191,7 @@ class TtsModel extends ChangeNotifier {
   }
 
   void setEnabled(AppLocalizations localizations, bool value) {
-
-    if(value == _isEnabled && !_isAlertsOnly) {
+    if (value == _isEnabled && !_isAlertsOnly) {
       return;
     }
 
@@ -329,7 +323,6 @@ class TtsModel extends ChangeNotifier {
 
   void say(AppLocalizations localizations, MessageModel model,
       {bool force = false}) async {
-
     if (!enabled && !force) {
       return;
     }
