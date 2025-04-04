@@ -65,7 +65,7 @@ class TtsModel extends ChangeNotifier {
       }
 
       String? streamLanguage =
-      await ChannelsAdapter.instance.forChannel(channel).map((event) {
+          await ChannelsAdapter.instance.forChannel(channel).map((event) {
         if (event is TwitchChannelMetadata) {
           return event.language;
         }
@@ -78,7 +78,7 @@ class TtsModel extends ChangeNotifier {
       }
 
       _isSupportedLanguage =
-      !(streamLanguage == 'other' || streamLanguage == 'asl');
+          !(streamLanguage == 'other' || streamLanguage == 'asl');
       language = _isSupportedLanguage ? Language(streamLanguage) : Language();
       notifyListeners();
     }
@@ -111,10 +111,10 @@ class TtsModel extends ChangeNotifier {
     if (model is TwitchMessageModel) {
       final text = model.tokenized
           .where((token) =>
-      token is TextToken ||
-          (!_isEmoteMuted && token is EmoteToken) ||
-          token is UserMentionToken ||
-          token is LinkToken)
+              token is TextToken ||
+              (!_isEmoteMuted && token is EmoteToken) ||
+              token is UserMentionToken ||
+              token is LinkToken)
           .map((token) {
         if (token is TextToken) {
           return token.text;
@@ -156,26 +156,18 @@ class TtsModel extends ChangeNotifier {
   }
 
   void setAlertsOnly(AppLocalizations localizations, bool value) {
-
-
     if (value == _isAlertsOnly) {
       return;
     }
 
-    if(value) {
+    if (value) {
       _isEnabled = true;
     }
 
     _isAlertsOnly = value;
-    if(value) {
-     if(!newTtsEnabled) {
-       say(
-           localizations,
-           SystemMessageModel(
-               text:  localizations.alertsEnabled),
-           force: true);
-     }
-
+    if (value) {
+      say(localizations, SystemMessageModel(text: localizations.alertsEnabled),
+          force: true);
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -199,8 +191,7 @@ class TtsModel extends ChangeNotifier {
   }
 
   void setEnabled(AppLocalizations localizations, bool value) {
-
-    if(value == _isEnabled && !_isAlertsOnly) {
+    if (value == _isEnabled && !_isAlertsOnly) {
       return;
     }
 
@@ -209,20 +200,16 @@ class TtsModel extends ChangeNotifier {
       _lastMessageTime = DateTime.now();
     }
 
-    if(!newTtsEnabled) {
-      say(
-          localizations,
-          SystemMessageModel(
-              text: value
-                  ? localizations.textToSpeechEnabled
-                  : localizations.textToSpeechDisabled),
-          force: true);
-    }
-
+    say(
+        localizations,
+        SystemMessageModel(
+            text: value
+                ? localizations.textToSpeechEnabled
+                : localizations.textToSpeechDisabled),
+        force: true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
-
   }
 
   Language get language {
@@ -336,7 +323,6 @@ class TtsModel extends ChangeNotifier {
 
   void say(AppLocalizations localizations, MessageModel model,
       {bool force = false}) async {
-
     if (!enabled && !force) {
       return;
     }
@@ -347,7 +333,7 @@ class TtsModel extends ChangeNotifier {
 
     if (model is TwitchMessageModel) {
       if (_mutedUsers.any((user) =>
-      user.displayName?.toLowerCase() ==
+          user.displayName?.toLowerCase() ==
           model.author.displayName?.toLowerCase())) {
         return;
       }
@@ -419,7 +405,7 @@ class TtsModel extends ChangeNotifier {
           }
         }
         final response =
-        await FirebaseFunctions.instance.httpsCallable("synthesize")({
+            await FirebaseFunctions.instance.httpsCallable("synthesize")({
           "voice": voice ?? "en-US-WaveNet-F",
           "text": vocalization,
           "rate": _speed * 1.5 + 0.5,
@@ -489,14 +475,14 @@ class TtsModel extends ChangeNotifier {
   }
 
   Map<String, dynamic> toJson() => {
-    "isBotMuted": isBotMuted,
-    "isEmoteMuted": isEmoteMuted,
-    "isPreludeMuted": isPreludeMuted,
-    "isRandomVoiceEnabled": isRandomVoiceEnabled,
-    "language": language.languageCode,
-    "pitch": pitch,
-    "speed": speed,
-    "voice": _voice,
-    'mutedUsers': _mutedUsers.map((e) => e.toJson()).toList(),
-  };
+        "isBotMuted": isBotMuted,
+        "isEmoteMuted": isEmoteMuted,
+        "isPreludeMuted": isPreludeMuted,
+        "isRandomVoiceEnabled": isRandomVoiceEnabled,
+        "language": language.languageCode,
+        "pitch": pitch,
+        "speed": speed,
+        "voice": _voice,
+        'mutedUsers': _mutedUsers.map((e) => e.toJson()).toList(),
+      };
 }

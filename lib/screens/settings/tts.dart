@@ -61,7 +61,7 @@ class TextToSpeechScreen extends StatelessWidget {
                                         side: BorderSide(
                                             width: 2,
                                             color:
-                                            Theme.of(context).dividerColor),
+                                                Theme.of(context).dividerColor),
                                       ),
                                       child: Align(
                                         alignment: Alignment.centerLeft,
@@ -91,7 +91,7 @@ class TextToSpeechScreen extends StatelessWidget {
                         SwitchListTile.adaptive(
                           title: const Text('Per-viewer voice'),
                           subtitle:
-                          const Text('Identify your viewers by voice'),
+                              const Text('Identify your viewers by voice'),
                           value: model.isRandomVoiceEnabled,
                           onChanged: (value) {
                             model.isRandomVoiceEnabled = value;
@@ -106,27 +106,27 @@ class TextToSpeechScreen extends StatelessWidget {
                                 onPressed: model.isRandomVoiceEnabled
                                     ? null
                                     : () {
-                                  Navigator.pushNamed(context,
-                                      '/settings/text-to-speech/voices');
-                                },
+                                        Navigator.pushNamed(context,
+                                            '/settings/text-to-speech/voices');
+                                      },
                                 style: OutlinedButton.styleFrom(
                                   textStyle:
-                                  Theme.of(context).textTheme.titleLarge,
+                                      Theme.of(context).textTheme.titleLarge,
                                   side: BorderSide(
                                       width: 2,
                                       color: Theme.of(context).dividerColor),
                                 ).copyWith(
                                   foregroundColor:
-                                  WidgetStateProperty.resolveWith<Color>(
-                                        (Set<WidgetState> states) =>
-                                    states.contains(WidgetState.disabled)
-                                        ? Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withValues(alpha: 0.6)
-                                        : Theme.of(context)
-                                        .colorScheme
-                                        .onSurface,
+                                      WidgetStateProperty.resolveWith<Color>(
+                                    (Set<WidgetState> states) =>
+                                        states.contains(WidgetState.disabled)
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withValues(alpha: 0.6)
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
                                   ),
                                 ),
                                 child: Align(
@@ -203,11 +203,11 @@ class TextToSpeechScreen extends StatelessWidget {
                     max: 2,
                     label: "${model.pitch}",
                     onChanged:
-                    model.isRandomVoiceEnabled && model.isCloudTtsEnabled
-                        ? null
-                        : (value) {
-                      model.pitch = value;
-                    },
+                        model.isRandomVoiceEnabled && model.isCloudTtsEnabled
+                            ? null
+                            : (value) {
+                                model.pitch = value;
+                              },
                   ),
                   if (kDebugMode && !model.isCloudTtsEnabled)
                     Column(
@@ -264,16 +264,6 @@ class TextToSpeechScreen extends StatelessWidget {
                 model.isPreludeMuted = value;
               },
             ),
-
-            SwitchListTile.adaptive(
-              title: const Text("Enable new text to speech"),
-              value: model.newTtsEnabled,
-              onChanged: (value) {
-                model.newTtsEnabled = value;
-              },
-            ),
-
-
           ],
         );
       }),
