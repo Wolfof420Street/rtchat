@@ -65,7 +65,7 @@ class TtsModel extends ChangeNotifier {
       }
 
       String? streamLanguage =
-          await ChannelsAdapter.instance.forChannel(channel).map((event) {
+      await ChannelsAdapter.instance.forChannel(channel).map((event) {
         if (event is TwitchChannelMetadata) {
           return event.language;
         }
@@ -78,7 +78,7 @@ class TtsModel extends ChangeNotifier {
       }
 
       _isSupportedLanguage =
-          !(streamLanguage == 'other' || streamLanguage == 'asl');
+      !(streamLanguage == 'other' || streamLanguage == 'asl');
       language = _isSupportedLanguage ? Language(streamLanguage) : Language();
       notifyListeners();
     }
@@ -111,10 +111,10 @@ class TtsModel extends ChangeNotifier {
     if (model is TwitchMessageModel) {
       final text = model.tokenized
           .where((token) =>
-              token is TextToken ||
-              (!_isEmoteMuted && token is EmoteToken) ||
-              token is UserMentionToken ||
-              token is LinkToken)
+      token is TextToken ||
+          (!_isEmoteMuted && token is EmoteToken) ||
+          token is UserMentionToken ||
+          token is LinkToken)
           .map((token) {
         if (token is TextToken) {
           return token.text;
@@ -167,13 +167,13 @@ class TtsModel extends ChangeNotifier {
     }
 
     _isAlertsOnly = value;
-   if(value) {
-     say(
-         localizations,
-         SystemMessageModel(
-             text:  localizations.alertsEnabled),
-         force: true);
-   }
+    if(value) {
+      say(
+          localizations,
+          SystemMessageModel(
+              text:  localizations.alertsEnabled),
+          force: true);
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
@@ -340,7 +340,7 @@ class TtsModel extends ChangeNotifier {
 
     if (model is TwitchMessageModel) {
       if (_mutedUsers.any((user) =>
-          user.displayName?.toLowerCase() ==
+      user.displayName?.toLowerCase() ==
           model.author.displayName?.toLowerCase())) {
         return;
       }
@@ -412,7 +412,7 @@ class TtsModel extends ChangeNotifier {
           }
         }
         final response =
-            await FirebaseFunctions.instance.httpsCallable("synthesize")({
+        await FirebaseFunctions.instance.httpsCallable("synthesize")({
           "voice": voice ?? "en-US-WaveNet-F",
           "text": vocalization,
           "rate": _speed * 1.5 + 0.5,
@@ -482,14 +482,14 @@ class TtsModel extends ChangeNotifier {
   }
 
   Map<String, dynamic> toJson() => {
-        "isBotMuted": isBotMuted,
-        "isEmoteMuted": isEmoteMuted,
-        "isPreludeMuted": isPreludeMuted,
-        "isRandomVoiceEnabled": isRandomVoiceEnabled,
-        "language": language.languageCode,
-        "pitch": pitch,
-        "speed": speed,
-        "voice": _voice,
-        'mutedUsers': _mutedUsers.map((e) => e.toJson()).toList(),
-      };
+    "isBotMuted": isBotMuted,
+    "isEmoteMuted": isEmoteMuted,
+    "isPreludeMuted": isPreludeMuted,
+    "isRandomVoiceEnabled": isRandomVoiceEnabled,
+    "language": language.languageCode,
+    "pitch": pitch,
+    "speed": speed,
+    "voice": _voice,
+    'mutedUsers': _mutedUsers.map((e) => e.toJson()).toList(),
+  };
 }

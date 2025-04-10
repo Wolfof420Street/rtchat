@@ -39,12 +39,12 @@ class ResizableWidget extends StatefulWidget {
 
   const ResizableWidget(
       {super.key,
-      required this.resizable,
-      required this.height,
-      required this.width,
-      required this.onResizeHeight,
-      required this.onResizeWidth,
-      required this.child});
+        required this.resizable,
+        required this.height,
+        required this.width,
+        required this.onResizeHeight,
+        required this.onResizeWidth,
+        required this.child});
 
   @override
   State<ResizableWidget> createState() => _ResizableWidgetState();
@@ -109,9 +109,9 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           RawGestureDetector(
             gestures: {
               EagerHorizontalDragRecognizer:
-                  GestureRecognizerFactoryWithHandlers<
-                      EagerHorizontalDragRecognizer>(
-                () => EagerHorizontalDragRecognizer()
+              GestureRecognizerFactoryWithHandlers<
+                  EagerHorizontalDragRecognizer>(
+                    () => EagerHorizontalDragRecognizer()
                   ..onStart = (details) {
                     setState(() {
                       _width = widget.width;
@@ -130,7 +130,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
                       _width += details.delta.dx;
                     });
                   },
-                (instance) {},
+                    (instance) {},
               )
             },
             child: const SizedBox(
@@ -195,10 +195,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Subscribe to keyboard visibility changes.
     keyboardSubscription =
         keyboardVisibilityController.onChange.listen((visible) {
-      setState(() {
-        _isKeyboardVisible = visible;
-      });
-    });
+          setState(() {
+            _isKeyboardVisible = visible;
+          });
+        });
   }
 
   @override
@@ -232,123 +232,113 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             appBar: orientation == Orientation.landscape && _isKeyboardVisible
                 ? null
                 : HeaderBarWidget(
-                    onChannelSelect: widget.onChannelSelect,
-                    channel: widget.channel,
-                    actions: [
-                      Consumer2<ActivityFeedModel, LayoutModel>(
-                        builder:
-                            (context, activityFeedModel, layoutModel, child) {
-                          if (!activityFeedModel.isEnabled) {
-                            return Container();
-                          }
-                          return IconButton(
-                            icon: Icon(layoutModel.isShowNotifications
-                                ? Icons.notifications
-                                : Icons.notifications_outlined),
-                            tooltip: AppLocalizations.of(context)!.activityFeed,
-                            onPressed: () {
-                              layoutModel.isShowNotifications =
-                                  !layoutModel.isShowNotifications;
-                            },
-                          );
+              onChannelSelect: widget.onChannelSelect,
+              channel: widget.channel,
+              actions: [
+                Consumer2<ActivityFeedModel, LayoutModel>(
+                  builder:
+                      (context, activityFeedModel, layoutModel, child) {
+                    if (!activityFeedModel.isEnabled) {
+                      return Container();
+                    }
+                    return IconButton(
+                      icon: Icon(layoutModel.isShowNotifications
+                          ? Icons.notifications
+                          : Icons.notifications_outlined),
+                      tooltip: AppLocalizations.of(context)!.activityFeed,
+                      onPressed: () {
+                        layoutModel.isShowNotifications =
+                        !layoutModel.isShowNotifications;
+                      },
+                    );
+                  },
+                ),
+                if (width > 256)
+                  Consumer<LayoutModel>(
+                    builder: (context, layoutModel, child) {
+                      return IconButton(
+                        icon: Icon(layoutModel.isShowPreview
+                            ? Icons.preview
+                            : Icons.preview_outlined),
+                        tooltip:
+                        AppLocalizations.of(context)!.streamPreview,
+                        onPressed: () {
+                          layoutModel.isShowPreview =
+                          !layoutModel.isShowPreview;
                         },
-                      ),
-                      if (width > 256)
-                        Consumer<LayoutModel>(
-                          builder: (context, layoutModel, child) {
-                            return IconButton(
-                              icon: Icon(layoutModel.isShowPreview
-                                  ? Icons.preview
-                                  : Icons.preview_outlined),
-                              tooltip:
-                                  AppLocalizations.of(context)!.streamPreview,
-                              onPressed: () {
-                                layoutModel.isShowPreview =
-                                    !layoutModel.isShowPreview;
-                              },
-                            );
-                          },
-                        ),
-                      Consumer<TtsModel>(
-                        builder: (context, ttsModel, child) {
-                          return IconButton(
-                            icon: Icon(
-                              !kDebugMode
-                                  ? (
-                                  ttsModel.isAlertsOnly
-                                      ? Icons.campaign
-                                      :
-                                  ttsModel.enabled
-                                      ? Icons.volume_up
-                                      : Icons.volume_off)
-                                  : (ttsModel.newTtsEnabled
-                                      ? Icons.volume_up
-                                      : Icons.volume_off),
-                            ),
-                            tooltip: AppLocalizations.of(context)!.textToSpeech,
-                            onPressed: () async {
-                              if (!kDebugMode) {
-                                final localizations = AppLocalizations.of(context)!;
-
-                                if (!ttsModel.enabled) {
-
-                                 ttsModel.setAlertsOnly(localizations, true);
-
-                                } else if (ttsModel.isAlertsOnly) {
-
-                                  ttsModel.setEnabled(localizations, true);
-
-                                  ttsModel.setAlertsOnly(localizations, false);
-
-                                } else {
-
-                                  ttsModel.setEnabled(localizations, false);
-
-                                }
-
-
-
-                              } else {
-                                ttsModel.newTtsEnabled =
-                                    !ttsModel.newTtsEnabled;
-
-                                if (!ttsModel.newTtsEnabled) {
-                                  updateChannelSubscription("");
-                                  await TextToSpeechPlugin.speak(
-                                      "Text to speech disabled");
-                                  await TextToSpeechPlugin.disableTTS();
-                                  NotificationsPlugin.cancelNotification();
-                                } else {
-                                  // Start listening to the stream before toggling newTtsEnabled
-                                  channelStreamController.stream
-                                      .listen((currentChannel) {
-                                    if (currentChannel.isEmpty) {
-                                      ttsModel.newTtsEnabled = false;
-                                    }
-                                  });
-                                  await TextToSpeechPlugin.speak(
-                                      "Text to speech enabled");
-                                  updateChannelSubscription(
-                                    "${userModel.activeChannel?.provider}:${userModel.activeChannel?.channelId}",
-                                  );
-                                  NotificationsPlugin.showNotification();
-                                  NotificationsPlugin.listenToTts(ttsModel);
-                                }
-                              }
-                            },
-                          );
-                        },
-                      ),
-                      if (userModel.isSignedIn() && width > 256)
-                        IconButton(
-                          icon: const Icon(Icons.people),
-                          tooltip: AppLocalizations.of(context)!.currentViewers,
-                          onPressed: () {
-                            _scaffoldKey.currentState?.openEndDrawer();
-                          },
-                        ),
-                    ],
+                      );
+                    },
                   ),
+                Consumer<TtsModel>(
+                  builder: (context, ttsModel, child) {
+                    return IconButton(
+                      icon: Icon(
+                        !ttsModel.newTtsEnabled
+                            ? (ttsModel.isAlertsOnly
+                            ? Icons.campaign
+                            : ttsModel.enabled
+                            ? Icons.volume_up
+                            : Icons.volume_off)
+                            : (ttsModel.newTtsEnabled
+                            ? Icons.volume_up
+                            : Icons.volume_off),
+                      ),
+                      tooltip: AppLocalizations.of(context)!.textToSpeech,
+                      onPressed: () async {
+                        if (!ttsModel.newTtsEnabled) {
+                          final localizations =
+                          AppLocalizations.of(context)!;
+
+                          if (!ttsModel.enabled) {
+                            ttsModel.setAlertsOnly(localizations, true);
+                          } else if (ttsModel.isAlertsOnly) {
+                            ttsModel.setEnabled(localizations, true);
+
+                            ttsModel.setAlertsOnly(localizations, false);
+                          } else {
+                            ttsModel.setEnabled(localizations, false);
+                          }
+                        } else {
+                          ttsModel.newTtsEnabled =
+                          !ttsModel.newTtsEnabled;
+
+                          if (!ttsModel.newTtsEnabled) {
+                            updateChannelSubscription("");
+                            await TextToSpeechPlugin.speak(
+                                "Text to speech disabled");
+                            await TextToSpeechPlugin.disableTTS();
+                            NotificationsPlugin.cancelNotification();
+                          } else {
+                            // Start listening to the stream before toggling newTtsEnabled
+                            channelStreamController.stream
+                                .listen((currentChannel) {
+                              if (currentChannel.isEmpty) {
+                                ttsModel.newTtsEnabled = false;
+                              }
+                            });
+                            await TextToSpeechPlugin.speak(
+                                "Text to speech enabled");
+                            updateChannelSubscription(
+                              "${userModel.activeChannel?.provider}:${userModel.activeChannel?.channelId}",
+                            );
+                            NotificationsPlugin.showNotification();
+                            NotificationsPlugin.listenToTts(ttsModel);
+                          }
+                        }
+                      },
+                    );
+                  },
+                ),
+                if (userModel.isSignedIn() && width > 256)
+                  IconButton(
+                    icon: const Icon(Icons.people),
+                    tooltip: AppLocalizations.of(context)!.currentViewers,
+                    onPressed: () {
+                      _scaffoldKey.currentState?.openEndDrawer();
+                    },
+                  ),
+              ],
+            ),
             body: Container(
               height: mediaQuery.size.height,
               color: Theme.of(context).scaffoldBackgroundColor,
@@ -410,7 +400,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 child: DiscoWidget(
                                   isEnabled: widget.isDiscoModeEnabled,
                                   child:
-                                      ChatPanelWidget(channel: widget.channel),
+                                  ChatPanelWidget(channel: widget.channel),
                                 ),
                               ),
                               Consumer<LayoutModel>(
