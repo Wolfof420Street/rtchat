@@ -273,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   builder: (context, ttsModel, child) {
                     return IconButton(
                       icon: Icon(
-                        ttsModel.newTtsEnabled
+                        ttsModel.enabled && ttsModel.newTtsEnabled
                             ? Icons.volume_up
                             : Icons.volume_off,
                       ),

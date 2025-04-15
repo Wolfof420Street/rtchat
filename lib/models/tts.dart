@@ -180,7 +180,11 @@ class TtsModel extends ChangeNotifier {
       return;
     }
     _isNewTTsEnabled = value;
-
+    if (value) {
+      _isEnabled = true; // Enable TTS when switching to new system
+    } else {
+      _isEnabled = false; // Disable TTS when switching off new system
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
