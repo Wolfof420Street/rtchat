@@ -37,12 +37,11 @@ class AutocompleteWidget extends StatefulWidget {
   final Function(String) onSend;
   final Channel channel;
 
-  const AutocompleteWidget({
-    super.key,
-    required this.controller,
-    required this.onSend,
-    required this.channel,
-  });
+  const AutocompleteWidget(
+      {super.key,
+        required this.controller,
+        required this.onSend,
+        required this.channel});
 
   @override
   State<AutocompleteWidget> createState() => _AutocompleteWidgetState();
@@ -66,6 +65,7 @@ class _AutocompleteWidgetState extends State<AutocompleteWidget> {
   @override
   void dispose() {
     widget.controller.removeListener(_onTextChanged);
+
     super.dispose();
   }
 
@@ -124,77 +124,48 @@ class _AutocompleteWidgetState extends State<AutocompleteWidget> {
         );
       case _AutocompleteMode.slashCommand:
         if (MediaQuery.of(context).orientation == Orientation.landscape) {
-          return LayoutBuilder(builder: (context, constraints) {
-            return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: ChatMode.values
-                    .where((element) => element.title
-                    .toLowerCase()
-                    .startsWith(text.toLowerCase()))
-                    .take((constraints.maxWidth ~/ 80).clamp(1, 5)) // Adjust width per button
-                    .map((command) {
-                  return TextButton(
-                    onPressed: () => widget.onSend(command.title),
-                    style: TextButton.styleFrom(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      minimumSize: const Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      command.title,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  );
-                }).toList(),
-              ),
-            );
-          });
-        } else {
-          // Portrait mode: original ListView of ListTiles
-          return Container(
-            constraints: const BoxConstraints(maxHeight: 200),
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              children: ChatMode.values
-                  .where((element) =>
-                  element.title.toLowerCase().startsWith(text.toLowerCase()))
-                  .map((e) {
-                return ListTile(
-                  title: Text(e.title),
-                  subtitle: Text(e.subtitle),
-                  onTap: () => widget.onSend(e.title),
-                );
-              }).toList(),
-            ),
-          );
+          // this is too difficult to show in landscape mode.
+          return Container();
         }
-      case _AutocompleteMode.bangCommand:
-        final commandPrefix = text.split(" ").last.toLowerCase();
         return Container(
           constraints: const BoxConstraints(maxHeight: 200),
           child: ListView(
             shrinkWrap: true,
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            children: [
-              Consumer<CommandsModel>(builder: (context, model, child) {
-                return Wrap(
-                  children: model.commandList
-                      .where((element) =>
-                      element.command.startsWith(commandPrefix))
-                      .map((command) {
-                    return TextButton(
-                      child: Text(command.command),
-                      onPressed: () => widget.onSend(command.command),
-                    );
-                  }).toList(),
-                );
-              }),
-            ],
+            children: ChatMode.values
+                .where((element) =>
+                element.title.toLowerCase().startsWith(text.toLowerCase()))
+                .map((e) {
+              return ListTile(
+                title: Text(e.title),
+                subtitle: Text(e.subtitle),
+                onTap: () => widget.onSend(e.title),
+              );
+            }).toList(),
           ),
+        );
+      case _AutocompleteMode.bangCommand:
+        final commandPrefix = text.split(" ").last.toLowerCase();
+        return Container(
+          constraints: const BoxConstraints(maxHeight: 200),
+          child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              children: [
+                Consumer<CommandsModel>(builder: (context, model, child) {
+                  return Wrap(
+                    children: model.commandList
+                        .where((element) =>
+                        element.command.startsWith(commandPrefix))
+                        .map((command) {
+                      return TextButton(
+                        child: Text(command.command),
+                        onPressed: () => widget.onSend(command.command),
+                      );
+                    }).toList(),
+                  );
+                }),
+              ]),
         );
       case _AutocompleteMode.mention:
         final username = text.split(" ").last.substring(1);
