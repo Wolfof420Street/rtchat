@@ -297,11 +297,12 @@ class ThirdPartyScreen extends StatelessWidget {
               children: [
                 _RealtimeCashWidget(userId: userId),
                 const Divider(),
+                const _RtKitWidget(),
+                const Divider(),
                 _StreamlabsWidget(userId: userId),
                 const Divider(),
                 _StreamElementsWidget(userId: userId),
-                const Divider(),
-                const _RtKitWidget(),
+
               ],
             );
           },
