@@ -285,6 +285,16 @@ class _RealTimeKitWidgetState extends State<_RealTimeKitWidget> {
           leading: const Image(image: AssetImage('assets/realtimekit.png')),
           title: const Text("Realtime Kit"),
           subtitle: const Text("Connect to RealtimeKit services"),
+          trailing: SizedBox(
+            width: 24,
+            height: 24,
+            child: apiKey.isNotEmpty
+                ? const Icon(
+              Icons.check_circle,
+              color: Colors.green,
+            )
+                : const Icon(Icons.help),
+          ),
           onTap: () =>
           apiKey.isNotEmpty
               ? openUrl(Uri.parse(apiKey))
