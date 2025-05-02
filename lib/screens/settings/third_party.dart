@@ -264,18 +264,109 @@ class _StreamElementsWidget extends StatelessWidget {
   }
 }
 
-class _RealTimeKitWidget extends StatelessWidget {
+class _RealTimeKitWidget extends StatefulWidget {
 
-  const _RealTimeKitWidget();
+  @override
+  State<_RealTimeKitWidget> createState() => _RealTimeKitWidgetState();
+}
+
+class _RealTimeKitWidgetState extends State<_RealTimeKitWidget> {
+  var _scanController = MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
+
+  String apiKey = "";
 
   @override
   Widget build(BuildContext context) {
-      return ListTile(
+    return Column(
+      children: [
+        ListTile(
           leading: const Image(image: AssetImage('assets/realtimekit.png')),
           title: const Text("Realtime Kit"),
           subtitle: const Text("Connect to RealtimeKit services"),
-          onTap: () => openUrl(Uri.parse("https://kit.rtirl.com/")),
-      );
+          onTap: () =>
+          apiKey.isNotEmpty
+              ? openUrl(Uri.parse(apiKey))
+              : openUrl(Uri.parse("https://kit.rtirl.com/")),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 88, right: 16),
+          child: TextField(
+              controller: TextEditingController()
+                ..text = apiKey,
+              readOnly: true,
+              decoration: InputDecoration(
+                  hintText: "API Key",
+                  suffixIcon: IconButton(
+                      icon: const Icon(Icons.qr_code_scanner),
+                      onPressed: () {
+                        final messenger = ScaffoldMessenger.of(context);
+
+                        showModalBottomSheet(
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (ctx) {
+                            return Stack(
+                              children: [
+                                MobileScanner(
+                                  errorBuilder: (context, error, child) {
+                                    return ScannerErrorWidget(error: error);
+                                  },
+                                  controller: _scanController,
+                                  onDetect: (capture) {
+                                    final List<Barcode> barcodes = capture
+                                        .barcodes;
+
+                                    if (barcodes.isEmpty) {
+                                      messenger.showSnackBar(SnackBar(
+                                          content: Text(
+                                              AppLocalizations.of(context)!
+                                                  .invalidUrlErrorText)));
+                                      return;
+                                    }
+
+                                    final barcode = barcodes.first;
+
+                                    if (barcode.rawValue == null ||
+                                        barcode.rawValue!.isEmpty) {
+                                      messenger.showSnackBar(SnackBar(
+                                          content: Text(
+                                              AppLocalizations.of(context)!
+                                                  .invalidUrlErrorText)));
+                                      Navigator.pop(ctx);
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      apiKey = barcode.rawValue!;
+                                    });
+
+                                    Navigator.pop(ctx);
+                                  },
+                                ),
+                                Positioned(
+                                    top: 50,
+                                    left: 0,
+                                    right: 0,
+                                    child: ScannerSettings(
+                                      scanController: _scanController,
+                                    )),
+                              ],
+                            );
+                          },
+                        ).then((value) {
+                          _scanController.dispose();
+
+                          _scanController = MobileScannerController(
+                            detectionSpeed: DetectionSpeed.noDuplicates,
+                          );
+                        });
+                      })),
+              keyboardType: TextInputType.url),
+        ),
+      ],
+    );
   }
 }
 
@@ -297,7 +388,7 @@ class ThirdPartyScreen extends StatelessWidget {
               children: [
                 _RealtimeCashWidget(userId: userId),
                 const Divider(),
-                const _RealTimeKitWidget(),
+                _RealTimeKitWidget(),
                 const Divider(),
                 _StreamlabsWidget(userId: userId),
                 const Divider(),
