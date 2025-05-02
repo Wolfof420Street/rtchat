@@ -80,7 +80,7 @@ class _RealtimeCashWidgetState extends State<_RealtimeCashWidget> {
             padding: const EdgeInsets.only(left: 88, right: 16),
             child: TextField(
                 controller: TextEditingController()..text = snapshot.data ?? "",
-                readOnly: true,
+                readOnly: false,
                 decoration: InputDecoration(
                     hintText: "Wallet address",
                     suffixIcon: IconButton(
@@ -295,7 +295,7 @@ class _RealTimeKitWidgetState extends State<_RealTimeKitWidget> {
           child: TextField(
               controller: TextEditingController()
                 ..text = apiKey,
-              readOnly: true,
+              readOnly: false,
               decoration: InputDecoration(
                   hintText: "API Key",
                   suffixIcon: IconButton(
