@@ -264,9 +264,9 @@ class _StreamElementsWidget extends StatelessWidget {
   }
 }
 
-class _RtKitWidget extends StatelessWidget {
+class _RealTimeKitWidget extends StatelessWidget {
 
-  const _RtKitWidget();
+  const _RealTimeKitWidget();
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +297,7 @@ class ThirdPartyScreen extends StatelessWidget {
               children: [
                 _RealtimeCashWidget(userId: userId),
                 const Divider(),
-                const _RtKitWidget(),
+                const _RealTimeKitWidget(),
                 const Divider(),
                 _StreamlabsWidget(userId: userId),
                 const Divider(),
