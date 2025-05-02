@@ -264,6 +264,21 @@ class _StreamElementsWidget extends StatelessWidget {
   }
 }
 
+class _RtKitWidget extends StatelessWidget {
+
+  const _RtKitWidget();
+
+  @override
+  Widget build(BuildContext context) {
+      return ListTile(
+          leading: const Image(image: AssetImage('assets/realtimekit.png')),
+          title: const Text("Realtime Kit"),
+          subtitle: const Text("Connect to RealtimeKit services"),
+          onTap: () => openUrl(Uri.parse("https://kit.rtirl.com/")),
+      );
+  }
+}
+
 class ThirdPartyScreen extends StatelessWidget {
   const ThirdPartyScreen({super.key});
 
@@ -285,6 +300,8 @@ class ThirdPartyScreen extends StatelessWidget {
                 _StreamlabsWidget(userId: userId),
                 const Divider(),
                 _StreamElementsWidget(userId: userId),
+                const Divider(),
+                const _RtKitWidget(),
               ],
             );
           },
