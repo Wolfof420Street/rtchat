@@ -37,7 +37,14 @@ class SignInWithTwitch extends StatelessWidget {
         },
       ),
     );
-    controller.loadRequest(Uri.parse("about:blank"));
+   const htmlContent = '''
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="UTF-8"></head>
+      <body></body>
+      </html>
+      ''';
+    await controller.loadHtmlString(htmlContent);
     return completer.future;
   }
 
@@ -58,8 +65,7 @@ class SignInWithTwitch extends StatelessWidget {
           return;
         }
         if (!isGlobalThisSupported) {
-          // we need to sign in via QR code, so show a bottom sheet with a QR code.
-          // generate a uuid
+
           showModalBottomSheet<void>(
             context: context,
             isScrollControlled: true,

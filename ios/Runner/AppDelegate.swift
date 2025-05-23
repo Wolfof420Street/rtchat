@@ -6,7 +6,7 @@ import WebKit
 @main
 @objc class AppDelegate: FlutterAppDelegate {
     var sharedText = ""
-    
+
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -30,34 +30,34 @@ import WebKit
                     result(Bool(true))
                     return
                 }
-                
+
                 let utterance = AVSpeechUtterance(string: text)
                 // Set speech rate and volume
                 utterance.rate = args?["speed"] as? Float ?? AVSpeechUtteranceDefaultSpeechRate
                 utterance.volume = args?["volume"] as? Float ?? 1.0
                 synthesizer.speak(utterance)
                 result(Bool(true))
-                
+
             case "getLanguages":
                 var languageMap =  Dictionary<String, String>()
                 let voices = AVSpeechSynthesisVoice.speechVoices()
-                
+
                 for voice in voices {
                     languageMap[voice.language] = voice.name
                 }
-                
+
                 result(languageMap)
-                
+
             case "stopSpeaking":
                 if (synthesizer.isSpeaking) {synthesizer.stopSpeaking(at: AVSpeechBoundary.word)}
                 result(Bool(true))
-                
+
             default:
                 result(FlutterMethodNotImplemented)
-                     
+
             }
         }
-        
+
         let audioChannel = FlutterMethodChannel(name: "com.rtirl.chat/audio",
                                                 binaryMessenger: controller.binaryMessenger)
         audioChannel.setMethodCallHandler {
@@ -113,12 +113,12 @@ import WebKit
                     result(FlutterMethodNotImplemented)
                 }
         }
-        
+
         let shareChannel = FlutterMethodChannel(name: "com.rtirl.chat/share", binaryMessenger: controller.binaryMessenger)
-        
+
         shareChannel.setMethodCallHandler {
             call, result in
-            
+
             if call.method == "getSharedData" {
                 result(self.sharedText)
             }
@@ -127,22 +127,22 @@ import WebKit
         GeneratedPluginRegistrant.register(with: self)
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
-    
+
     override func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        
+
         if url.scheme == "com.rtirl.chat", url.host == "sharetext" {
             // This means that the app was launched from the share extension
             let uriComponents = NSURLComponents(string: url.absoluteString)
-            
+
             uriComponents?.queryItems?.forEach {
                 item in
-                
+
                 if item.name == "text", let itemValue = item.value?.removingPercentEncoding {
                     self.sharedText = itemValue
                 }
             }
         }
-        
+
         return true
     }
 }
