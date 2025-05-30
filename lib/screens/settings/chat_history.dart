@@ -233,7 +233,7 @@ class ChatHistoryScreen extends StatelessWidget {
                             model.quality = newValue;
                           }
                         },
-                        items: StreamPreviewModel.supportedQualities
+                        items: model.availableQualities
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
