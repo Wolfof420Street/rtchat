@@ -117,7 +117,7 @@ class _StreamPreviewState extends State<StreamPreview> {
           await _controller.runJavaScript(
               await rootBundle.loadString('assets/twitch-tunnel.js'));
 
-
+          // wait a second for twitch to catch up.
           await Future.delayed(const Duration(seconds: 1));
 
 
@@ -147,6 +147,10 @@ class _StreamPreviewState extends State<StreamPreview> {
 
     _promptTimer?.cancel();
     _qualityCheckTimer?.cancel();
+
+    // on iOS, the webview is not disposed when the widget is disposed.
+    // this causes audio to keep playing even when the widget is closed.
+    // therefore, we load a blank page to silence the audio.
 
     if (Platform.isIOS) {
       _controller.loadHtmlString(" ");
@@ -246,6 +250,8 @@ class _StreamPreviewState extends State<StreamPreview> {
                               onPressed: !_isOverlayActive
                                   ? null
                                   : () async {
+
+                                // SetVolume doesn't seem to work on ios so we use SetMuted instead and toggle between 0 and 100.
                                 if (Platform.isIOS) {
                                   model.volume =
                                   model.volume == 0 ? 100 : 0;
@@ -273,6 +279,8 @@ class _StreamPreviewState extends State<StreamPreview> {
                                     ? Icons.volume_up
                                     : Icons.volume_down,
                               )),
+
+                          // SetQuality doesn't seem to work on ios so we don't show the button.
                           if (!Platform.isIOS)
                             IconButton(
                                 onPressed: !_isOverlayActive || !_hasQualityOptions
