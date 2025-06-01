@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,8 @@ class SignInWithTwitch extends StatelessWidget {
   });
 
   static Future<bool> isGlobalThisSupported() async {
+    if (Platform.isIOS) return true;
+
     final completer = Completer<bool>();
     final controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted);
@@ -37,7 +40,7 @@ class SignInWithTwitch extends StatelessWidget {
         },
       ),
     );
-   const htmlContent = '''
+    const htmlContent = '''
       <!DOCTYPE html>
       <html>
       <head><meta charset="UTF-8"></head>
@@ -50,22 +53,27 @@ class SignInWithTwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final localizations = AppLocalizations.of(context)!;
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     return ElevatedButton(
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.all(const Color(0xFF6441A5)),
       ),
-      child: Text(AppLocalizations.of(context)!.signInWithTwitch,
+      child: Text(localizations.signInWithTwitch, 
           style: const TextStyle(
             color: Colors.white,
           )),
       onPressed: () async {
-        final isGlobalThisSupported =
-            await SignInWithTwitch.isGlobalThisSupported();
-        if (!context.mounted) {
-          return;
-        }
-        if (!isGlobalThisSupported) {
+        // Skip browser check on iOS
+        final isGlobalThisSupported = Platform.isIOS
+            ? true
+            : await SignInWithTwitch.isGlobalThisSupported();
 
+        if (!context.mounted) return;
+
+        if (!isGlobalThisSupported) {
           showModalBottomSheet<void>(
             context: context,
             isScrollControlled: true,
@@ -81,62 +89,45 @@ class SignInWithTwitch extends StatelessWidget {
           );
           return;
         }
-        final user = Provider.of<UserModel>(context, listen: false);
-        final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-        final navigator = Navigator.of(context);
-        final localizations = MaterialLocalizations.of(context);
-        final modalBarrierColor =
-            Theme.of(context).bottomSheetTheme.modalBarrierColor;
-        final navigatorContext = navigator.context;
-        if (!navigatorContext.mounted) {
-          return;
-        }
-        final capturedThemes =
-            InheritedTheme.capture(from: context, to: navigatorContext);
-        final retrySnackbar = SnackBar(
-            content: Text(AppLocalizations.of(context)!.signInError),
-            action: SnackBarAction(
-              label: "Sign in with another device",
-              onPressed: () {
-                navigator.push(ModalBottomSheetRoute(
-                  builder: (context) {
-                    return const CompanionAuthWidget(
-                      provider: "twitch",
-                      isTooOld: false,
-                    );
-                  },
-                  capturedThemes: capturedThemes,
-                  isScrollControlled: true,
-                  barrierOnTapHint: localizations
-                      .scrimOnTapHint(localizations.bottomSheetLabel),
-                  modalBarrierColor: modalBarrierColor,
-                ));
-              },
-            ));
+        final user = Provider.of<UserModel>(context, listen: false);
         onStart?.call();
+
         try {
           await FirebaseAnalytics.instance.logLogin(loginMethod: "twitch");
+
           final result = await FlutterWebAuth2.authenticate(
-              url: url.toString(), callbackUrlScheme: "com.rtirl.chat");
+            url: url.toString(),
+            callbackUrlScheme: "com.rtirl.chat",
+            options: const FlutterWebAuth2Options(
+              preferEphemeral: true,
+            ),
+          );
+
           final token = Uri.parse(result).queryParameters['token'];
           if (token != null) {
             await user.signIn(token);
-            // there's a bit of lag between the sign in call completing and the
-            // ui updating to the homepage. delay the onComplete handler so any
-            // loading indicator still shows.
-            Timer(const Duration(seconds: 3), () {
-              onComplete?.call();
-            });
+            Timer(const Duration(seconds: 3), () => onComplete?.call());
           } else {
             onComplete?.call();
-            scaffoldMessenger.showSnackBar(retrySnackbar);
+            scaffoldMessenger.showSnackBar(
+              SnackBar(content: Text(localizations.signInError)), // Use captured
+            );
+          }
+        } on PlatformException catch (e) {
+          onComplete?.call();
+          if (e.code != "CANCELLED") {
+            scaffoldMessenger.showSnackBar(
+              SnackBar(
+                  content: Text('${localizations.signInError}: ${e.message}')), // Use captured
+            );
           }
         } catch (e) {
           onComplete?.call();
-          if (!(e is PlatformException && e.code == "CANCELLED")) {
-            scaffoldMessenger.showSnackBar(retrySnackbar);
-          }
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+                content: Text('${localizations.signInError}: $e')), // Use captured
+          );
         }
       },
     );

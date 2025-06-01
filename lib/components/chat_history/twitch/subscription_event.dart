@@ -20,7 +20,7 @@ Color tierColor(BuildContext context, String tier) {
     return Theme.of(context).colorScheme.primary;
   }
 }
-
+ 
 class TwitchSubscriptionEventWidget extends StatelessWidget {
   final TwitchSubscriptionEventModel model;
 
