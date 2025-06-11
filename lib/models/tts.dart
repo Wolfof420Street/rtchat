@@ -17,7 +17,7 @@ import 'package:rtchat/models/tts/language.dart';
 import 'package:rtchat/models/tts/bytes_audio_source.dart';
 import 'package:rtchat/models/user.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:rtchat/l10n/app_localizations.dart';
 
 enum TtsMode { disabled, alertsOnly, enabled }
 
